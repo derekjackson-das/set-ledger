@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Set Ledger">
+<meta name="theme-color" content="#eceef2">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Set Ledger</title>
+<style>
+/* ── tokens: cool slate ground, ink-blue accent, burnt-orange top-set marker ── */
+:root {
+  color-scheme: light;
+  --page:        #eceef2;
+  --surface:     #fbfbfc;
+  --surface-2:   #f3f5f8;
+  --ink:         #12141a;
+  --ink-2:       #545a67;
+  --muted:       #7d8494;
+  --hair:        #dcdfe6;
+  --line:        #c3c8d3;
+  --accent:      #1c5cab;
+  --accent-ink:  #ffffff;
+  --accent-soft: #e2ecfb;
+  --mark:        #b64d1c;
+  --mark-soft:   #fbe9e0;
+  --series-1:    #2a78d6;
+  --series-2:    #eb6834;
+  --grid:        #e1e3ea;
+  --axis:        #c3c8d3;
+  --good:        #006300;
+  --danger:      #b3261e;
+  --danger-solid:#b3261e;
+  --danger-ink:  #ffffff;
+  --shadow:      0 1px 2px rgba(18,20,26,.06), 0 8px 24px -12px rgba(18,20,26,.18);
+  --radius:      14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:        #0c0d10;
+    --surface:     #171a1f;
+    --surface-2:   #1e2229;
+    --ink:         #ffffff;
+    --ink-2:       #c1c7d2;
+    --muted:       #8a919f;
+    --hair:        #292d35;
+    --line:        #3a404b;
+    --accent:      #5598e7;
+    --accent-ink:  #08111c;
+    --accent-soft: #1a2a3e;
+    --mark:        #ef9268;
+    --mark-soft:   #332016;
+    --series-1:    #3987e5;
+    --series-2:    #d95926;
+    --grid:        #262a31;
+    --axis:        #3a404b;
+    --good:        #0ca30c;
+    --danger:      #f08a84;
+    --danger-solid:#f08a84;
+    --danger-ink:  #2a0d0b;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:        #0c0d10;
+  --surface:     #171a1f;
+  --surface-2:   #1e2229;
+  --ink:         #ffffff;
+  --ink-2:       #c1c7d2;
+  --muted:       #8a919f;
+  --hair:        #292d35;
+  --line:        #3a404b;
+  --accent:      #5598e7;
+  --accent-ink:  #08111c;
+  --accent-soft: #1a2a3e;
+  --mark:        #ef9268;
+  --mark-soft:   #332016;
+  --series-1:    #3987e5;
+  --series-2:    #d95926;
+  --grid:        #262a31;
+  --axis:        #3a404b;
+  --good:        #0ca30c;
+  --danger:      #f08a84;
+  --danger-solid:#f08a84;
+  --danger-ink:  #2a0d0b;
+  --shadow:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 400 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.app { max-width: 600px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; background: var(--page); }
+
+/* ── header ── */
+.hdr {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--page);
+  border-bottom: 1px solid var(--hair);
+  padding: 12px 14px 0;
+}
+.hdr-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand svg { display: block; }
+.brand-name {
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif;
+  font-weight: 700; font-size: 26px; letter-spacing: .04em; text-transform: uppercase;
+  line-height: 1;
+}
+.sync { font-size: 11.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; font-weight: 500; }
+.sync b { color: var(--ink-2); font-weight: 600; }
+
+.tabs { display: flex; gap: 2px; margin-top: 12px; }
+.tab {
+  flex: 1 1 0; min-height: 44px; padding: 8px 4px 10px;
+  background: none; border: 0; border-bottom: 3px solid transparent;
+  color: var(--ink-2); cursor: pointer;
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif;
+  font-size: 17px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--ink); }
+
+main { flex: 1 1 auto; padding: 16px 14px 40px; }
+[role="tabpanel"]:focus-visible, .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid var(--series-1); outline-offset: 2px; border-radius: 6px;
+}
+[hidden] { display: none !important; }
+
+/* ── shared blocks ── */
+.card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); box-shadow: var(--shadow); }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow {
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600;
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 8px;
+}
+h2.sec {
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 700; font-size: 24px;
+  letter-spacing: .02em; text-transform: uppercase; margin: 0; text-wrap: balance;
+}
+.muted { color: var(--ink-2); }
+.small { font-size: 13.5px; }
+.mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* buttons */
+button { font-family: inherit; font-size: 15px; }
+.btn {
+  min-height: 44px; padding: 10px 16px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:hover { background: var(--surface-2); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn-primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn-ghost { border-color: transparent; background: none; color: var(--accent); padding: 10px 8px; }
+.btn-ghost:hover { background: var(--accent-soft); }
+.btn-danger { color: var(--danger); border-color: transparent; background: none; }
+.btn-danger:hover { background: var(--mark-soft); }
+.btn-solid-danger { background: var(--danger-solid); border-color: var(--danger-solid); color: var(--danger-ink); font-weight: 600; }
+.btn-solid-danger:hover { background: var(--danger-solid); filter: brightness(1.06); }
+.confirm-box { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.confirm-q { font-size: 13.5px; color: var(--ink-2); }
+.btn-sm { min-height: 36px; padding: 6px 12px; font-size: 14px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* inputs */
+label.fld { display: block; }
+.fld > span {
+  display: block; font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600;
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+input[type="text"], input[type="number"], input[type="date"], select {
+  width: 100%; min-height: 44px; padding: 8px 10px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 9px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+input.txt, select { font-family: "IBM Plex Sans", system-ui, sans-serif; }
+input::placeholder { color: var(--muted); opacity: 1; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ── log: session banner ── */
+.session-head { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.session-head .row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.session-title { display: flex; flex-direction: column; gap: 2px; flex: 1 1 180px; }
+.session-title strong { font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 23px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; line-height: 1.1; }
+.tallies { display: flex; gap: 18px; border-top: 1px solid var(--hair); padding-top: 10px; }
+.tally { display: flex; flex-direction: column; gap: 1px; }
+.tally b { font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 25px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tally span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+/* ── exercise block: echoes the ruled paper form ── */
+.ex { padding: 0; overflow: hidden; }
+.ex-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 12px; background: var(--surface-2); border-bottom: 1px solid var(--hair);
+}
+.ex-name {
+  flex: 1 1 auto; min-width: 0;
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600; font-size: 19px;
+  letter-spacing: .04em; text-transform: uppercase; line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.ex-last { font-size: 12px; color: var(--muted); white-space: nowrap; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+.set-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 12px; border-bottom: 1px solid var(--hair);
+}
+.set-row:last-of-type { border-bottom: 0; }
+.set-row.is-top { background: var(--mark-soft); box-shadow: inset 3px 0 0 var(--mark); }
+.set-n {
+  width: 20px; flex: none; text-align: center;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); font-weight: 500;
+}
+.set-row .w { width: 74px; flex: none; }
+.set-row .r { width: 62px; flex: none; }
+.times { color: var(--muted); font-size: 14px; flex: none; }
+.unit { color: var(--muted); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; flex: none; }
+.mark {
+  margin-left: auto; flex: none;
+  min-height: 40px; padding: 4px 9px 4px 7px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 13px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.mark .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.mark[aria-pressed="true"] { border-color: var(--mark); color: var(--mark); background: var(--surface); }
+.mark[aria-pressed="true"] .dot { border-color: var(--mark); background: var(--mark); }
+.x {
+  flex: none; width: 32px; height: 40px; border: 0; background: none; cursor: pointer;
+  color: var(--muted); font-size: 19px; line-height: 1; border-radius: 8px;
+}
+.x:hover { color: var(--danger); background: var(--surface-2); }
+.ex-foot { display: flex; gap: 6px; padding: 8px 8px 10px 12px; border-top: 1px solid var(--hair); }
+
+/* add-exercise form */
+.addex { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.addex .grid { display: grid; grid-template-columns: 1fr 84px; gap: 8px; }
+
+/* routine cards */
+.routine-pick { width: 100%; text-align: left; padding: 14px; display: flex; align-items: center; gap: 12px; }
+.routine-pick .meta { flex: 1 1 auto; min-width: 0; }
+.routine-pick .meta strong { display: block; font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 21px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.routine-pick .meta span { font-size: 13px; color: var(--ink-2); }
+.routine-pick .go { flex: none; color: var(--accent); font-weight: 600; font-size: 14px; }
+
+/* history */
+.hist { width: 100%; text-align: left; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.hist .d { font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; width: 74px; flex: none; color: var(--ink-2); }
+.hist .n { flex: 1 1 auto; min-width: 0; }
+.hist .n strong { display: block; font-size: 15px; font-weight: 600; }
+.hist .n span { font-size: 12.5px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+.chip {
+  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--accent); color: var(--accent);
+}
+.detail { border-top: 1px solid var(--hair); padding: 10px 14px 14px; }
+.detail table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.detail th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 4px 0; font-weight: 600; }
+.detail td { padding: 5px 0; border-top: 1px solid var(--hair); vertical-align: top; }
+.detail td.sets { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; text-align: right; }
+.detail td.sets .top { color: var(--mark); font-weight: 600; }
+
+/* charts */
+.chart-card { padding: 14px 12px 12px; }
+.chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 2px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.plot { position: relative; }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tip {
+  position: absolute; pointer-events: none; z-index: 5; min-width: 108px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
+  box-shadow: var(--shadow); padding: 7px 9px; font-size: 12.5px; transform: translate(-50%, -100%);
+}
+.tip .t { font-weight: 600; margin-bottom: 3px; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.tip .v { display: flex; align-items: center; gap: 6px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.stat-row { display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--hair); margin-top: 10px; padding-top: 10px; }
+.dtable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+.dtable th, .dtable td { text-align: right; padding: 5px 6px; border-top: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
+.dtable th:first-child, .dtable td:first-child { text-align: left; font-variant-numeric: normal; }
+.dtable thead th { border-top: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.scroll-x { overflow-x: auto; }
+
+/* routines editor */
+.r-edit { padding: 12px; }
+.r-row { display: grid; grid-template-columns: 1fr 74px 40px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.r-row .lbl { font-size: 11px; }
+
+.warn { border: 1px solid var(--mark); background: var(--mark-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; }
+.warn strong { display: block; margin-bottom: 3px; }
+textarea.paste { width: 100%; min-height: 96px; padding: 8px 10px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 9px; font-family: "ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace"; font-size: 13px; }
+.empty { padding: 22px 16px; text-align: center; color: var(--ink-2); }
+.empty p { margin: 0 0 12px; }
+.skel { height: 68px; border-radius: var(--radius); background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%); background-size: 200% 100%; animation: sh 1.4s linear infinite; border: 1px solid var(--hair); }
+@keyframes sh { to { background-position: -200% 0; } }
+.toast {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  background: var(--ink); color: var(--page); padding: 10px 16px; border-radius: 999px;
+  font-size: 14px; font-weight: 500; z-index: 50; box-shadow: var(--shadow);
+  opacity: 0; transition: opacity .18s ease; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; }
+footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-top">
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="20" height="20" rx="3" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+          <path d="M1 8h20M1 15h20M8 1v20" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+          <circle cx="15" cy="11.5" r="4.2" fill="none" stroke="var(--mark)" stroke-width="2"/>
+        </svg>
+        <span class="brand-name">Set Ledger</span>
+      </div>
+      <p class="sync" id="syncNote">Loading</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-log"      aria-controls="panel-log"      aria-selected="true">Log</button>
+      <button class="tab" role="tab" id="tab-history"  aria-controls="panel-history"  aria-selected="false" tabindex="-1">History</button>
+      <button class="tab" role="tab" id="tab-progress" aria-controls="panel-progress" aria-selected="false" tabindex="-1">Progress</button>
+      <button class="tab" role="tab" id="tab-routines" aria-controls="panel-routines" aria-selected="false" tabindex="-1">Routines</button>
+    </div>
+  </header>
+
+  <main>
+    <section role="tabpanel" id="panel-log"      aria-labelledby="tab-log"      tabindex="0"></section>
+    <section role="tabpanel" id="panel-history"  aria-labelledby="tab-history"  tabindex="0" hidden></section>
+    <section role="tabpanel" id="panel-progress" aria-labelledby="tab-progress" tabindex="0" hidden></section>
+    <section role="tabpanel" id="panel-routines" aria-labelledby="tab-routines" tabindex="0" hidden></section>
+  </main>
+
+  <footer class="foot">
+    <p id="footNote">Weights in pounds. Estimated one-rep max uses the Epley formula (weight × (1 + reps ÷ 30)).</p>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ────────────────────────── helpers ────────────────────────── */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const el = (t, a, kids) => {
+    const n = document.createElement(t);
+    if (a) for (const k in a) {
+      if (k === "class") n.className = a[k];
+      else if (k === "text") n.textContent = a[k];
+      else if (k === "html") n.innerHTML = a[k];
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), a[k]);
+      else if (a[k] !== null && a[k] !== undefined && a[k] !== false) n.setAttribute(k, a[k]);
+    }
+    (kids || []).forEach(c => c && n.appendChild(c));
+    return n;
+  };
+  const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const num = v => (v === null || v === undefined || v === "" ? null : (isFinite(+v) ? +v : null));
+  const fmt = n => (n === null ? "—" : (Math.round(n * 10) / 10).toLocaleString("en-US"));
+  const todayISO = () => { const d = new Date(); return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-"); };
+  const parseISO = s => { const p = String(s).split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); };
+  const shortDate = s => parseISO(s).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const longDate = s => parseISO(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const epley = (w, r) => w * (1 + r / 30);
+  const filled = st => num(st.w) !== null && num(st.r) !== null && +st.r > 0;
+  const sessionVolume = s => (s.entries || []).reduce((a, e) => a + (e.sets || []).reduce((b, st) => b + (filled(st) ? +st.w * +st.r : 0), 0), 0);
+  const sessionSets = s => (s.entries || []).reduce((a, e) => a + (e.sets || []).filter(filled).length, 0);
+  const hasData = s => sessionSets(s) > 0;
+
+  /* Sandboxed pages can't open confirm() dialogs — the call is ignored and
+     reads as "cancel", so destructive actions confirm inline instead. */
+  function confirmButton(label, question, onYes) {
+    const box = el("span", { class: "confirm-box" });
+    function idle(focusIt) {
+      box.textContent = "";
+      const b = el("button", { class: "btn btn-sm btn-danger", text: label, onclick: () => armed() });
+      box.appendChild(b);
+      if (focusIt) b.focus();
+    }
+    function armed() {
+      box.textContent = "";
+      const yes = el("button", {
+        class: "btn btn-sm btn-solid-danger", text: "Yes, delete",
+        "aria-label": question + " Yes, delete.",
+        onclick: () => onYes()
+      });
+      box.appendChild(el("span", { class: "confirm-q", text: question }));
+      box.appendChild(yes);
+      box.appendChild(el("button", { class: "btn btn-sm", text: "Keep", onclick: () => idle(true) }));
+      yes.focus();
+    }
+    idle(false);
+    return box;
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+  }
+
+  /* Starting data, transcribed from Derek's trainer sheet (30 Aug 2026).
+     Used only the first time this file runs on a device. */
+  const SEED = {
+    "routines": [
+      {
+        "id": "r_day_a",
+        "name": "Day A \u00b7 Machines",
+        "order": 1,
+        "updatedAt": 1756512000000,
+        "exercises": [
+          {
+            "id": "x_a1",
+            "name": "Warm-up: World's Greatest Stretch",
+            "sets": 1
+          },
+          {
+            "id": "x_a2",
+            "name": "Warm-up: Medicine Ball Slams",
+            "sets": 1
+          },
+          {
+            "id": "x_a3",
+            "name": "Warm-up: Reverse Woodchops",
+            "sets": 1
+          },
+          {
+            "id": "x_a4",
+            "name": "Machine Rows",
+            "sets": 3
+          },
+          {
+            "id": "x_a5",
+            "name": "Leg Press (Seat 7)",
+            "sets": 4
+          },
+          {
+            "id": "x_a6",
+            "name": "Hamstring Extensions",
+            "sets": 3
+          },
+          {
+            "id": "x_a7",
+            "name": "Assisted Pull-Ups",
+            "sets": 3
+          },
+          {
+            "id": "x_a8",
+            "name": "Machine Chest Dips",
+            "sets": 3
+          },
+          {
+            "id": "x_a9",
+            "name": "Pec Deck Chest Fly",
+            "sets": 3
+          },
+          {
+            "id": "x_a10",
+            "name": "Pec Deck Reverse Fly",
+            "sets": 3
+          }
+        ]
+      },
+      {
+        "id": "r_day_b",
+        "name": "Day B \u00b7 Dumbbells",
+        "order": 2,
+        "updatedAt": 1756512000000,
+        "exercises": [
+          {
+            "id": "x_b1",
+            "name": "Warm-up: Deadhangs",
+            "sets": 1
+          },
+          {
+            "id": "x_b2",
+            "name": "Warm-up: Pallof Press",
+            "sets": 1
+          },
+          {
+            "id": "x_b3",
+            "name": "Warm-up: Planks",
+            "sets": 1
+          },
+          {
+            "id": "x_b4",
+            "name": "Lower Back Extensions",
+            "sets": 3
+          },
+          {
+            "id": "x_b5",
+            "name": "Goblet Squats",
+            "sets": 3
+          },
+          {
+            "id": "x_b6",
+            "name": "DB Deadlifts",
+            "sets": 3
+          },
+          {
+            "id": "x_b7",
+            "name": "DB Flat Bench",
+            "sets": 3
+          },
+          {
+            "id": "x_b8",
+            "name": "DB Rows",
+            "sets": 3
+          },
+          {
+            "id": "x_b9",
+            "name": "DB Laterals",
+            "sets": 3
+          },
+          {
+            "id": "x_b10",
+            "name": "DB Skullcrushers",
+            "sets": 3
+          },
+          {
+            "id": "x_b11",
+            "name": "DB Incline Curls",
+            "sets": 3
+          }
+        ]
+      }
+    ],
+    "sessions": []
+  };
+
+  /* ────────────────────────── state ────────────────────────── */
+  const state = {
+    tab: "log",
+    loading: true,
+    routines: [],
+    sessions: [],       // finished + in-progress, newest first
+    draft: null,        // the session being logged right now
+    openHistory: null,
+    focusRoutine: null,
+    chartExercise: null,
+    showRestore: false,
+    storageOK: true,
+    showLineTable: false,
+    showVolTable: false,
+    focusIdx: null
+  };
+  let lastEdit = 0;
+  const dirty = () => Date.now() - lastEdit < 4000;
+  const touch = () => { lastEdit = Date.now(); };
+
+  /* ────────────────────────── storage ────────────────────────── */
+  const LS = "setledger.v1";
+  const db = null;
+
+  function localRead() {
+    try {
+      const raw = localStorage.getItem(LS);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+  function localWrite() {
+    if (db) return;
+    try {
+      localStorage.setItem(LS, JSON.stringify({ routines: state.routines, sessions: state.sessions }));
+    } catch (e) { /* private mode, quota — nothing to do */ }
+  }
+
+  const saveTimers = {};
+  function queueSession(s, immediate) {
+    s.updatedAt = Date.now();
+    const run = () => {
+      if (!db) { upsertLocalSession(s); localWrite(); return; }
+      db.doc("sessions/" + s.id).set(clone(s)).catch(dbFail);
+    };
+    if (!db) { run(); return; }
+    clearTimeout(saveTimers[s.id]);
+    if (immediate) run(); else saveTimers[s.id] = setTimeout(run, 700);
+  }
+  function upsertLocalSession(s) {
+    const i = state.sessions.findIndex(x => x.id === s.id);
+    if (i >= 0) state.sessions[i] = clone(s); else state.sessions.unshift(clone(s));
+    state.sessions.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0)));
+  }
+  function removeSession(id) {
+    state.sessions = state.sessions.filter(s => s.id !== id);
+    if (db) db.doc("sessions/" + id).delete().catch(dbFail); else localWrite();
+  }
+  function queueRoutine(r, immediate) {
+    r.updatedAt = Date.now();
+    const run = () => {
+      if (!db) {
+        const i = state.routines.findIndex(x => x.id === r.id);
+        if (i >= 0) state.routines[i] = clone(r); else state.routines.push(clone(r));
+        localWrite(); return;
+      }
+      db.doc("routines/" + r.id).set(clone(r)).catch(dbFail);
+    };
+    if (!db) { run(); return; }
+    clearTimeout(saveTimers[r.id]);
+    if (immediate) run(); else saveTimers[r.id] = setTimeout(run, 700);
+  }
+  function removeRoutine(id) {
+    state.routines = state.routines.filter(r => r.id !== id);
+    if (db) db.doc("routines/" + id).delete().catch(dbFail); else localWrite();
+  }
+  function dbFail(e) {
+    const code = e && e.code;
+    if (code === "quota_exceeded") toast("Storage is full — delete an old session to add more.");
+    else if (code === "resource_exhausted") toast("Saving too fast. Give it a second and try again.");
+    else if (code === "revoked") toast("Sync stopped. Your last change may not be saved.");
+    else toast("That change didn't save. Try again.");
+  }
+
+  function ingest(kind, list) {
+    if (kind === "routines") {
+      state.routines = list.sort((a, b) => (a.order || 0) - (b.order || 0) || String(a.name).localeCompare(String(b.name)));
+    } else {
+      state.sessions = list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0)));
+      const active = state.sessions.find(s => !s.done);
+      if (!state.draft) state.draft = active ? clone(active) : null;
+      else if (!dirty()) {
+        if (active && active.id === state.draft.id) state.draft = clone(active);
+        else if (!active) state.draft = null;
+      }
+    }
+    if (state.loading) { state.loading = false; }
+    if (!dirty()) render();
+  }
+
+  function storageOK() {
+    try { const k = "__sl_probe"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+
+  function boot() {
+    const ok = storageOK();
+    const cached = ok ? localRead() : null;
+    if (cached && (cached.routines || cached.sessions)) {
+      state.routines = cached.routines || [];
+      state.sessions = cached.sessions || [];
+    } else {
+      state.routines = clone(SEED.routines);
+      state.sessions = clone(SEED.sessions);
+      if (ok) localWrite();
+    }
+    const active = state.sessions.find(s => !s.done);
+    state.draft = active ? clone(active) : null;
+    state.loading = false;
+    $("#syncNote").innerHTML = ok ? 'Offline &middot; <b>this device</b>' : '<b>Not saving</b>';
+    state.storageOK = ok;
+    render();
+  }
+
+  /* ────────────────────────── derived data ────────────────────────── */
+  function allSessions() {
+    const map = new Map();
+    state.sessions.forEach(s => map.set(s.id, s));
+    if (state.draft) map.set(state.draft.id, state.draft);
+    return Array.from(map.values()).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0)));
+  }
+  function exerciseNames() {
+    const set = new Set();
+    state.routines.forEach(r => (r.exercises || []).forEach(e => e.name && set.add(e.name.trim())));
+    allSessions().forEach(s => (s.entries || []).forEach(e => e.name && set.add(e.name.trim())));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }
+  function loggedExerciseNames() {
+    const set = new Set();
+    allSessions().forEach(s => (s.entries || []).forEach(e => {
+      if (e.name && (e.sets || []).some(filled)) set.add(e.name.trim());
+    }));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }
+  function lastPerformance(name, excludeId) {
+    const key = String(name).trim().toLowerCase();
+    for (const s of allSessions()) {
+      if (s.id === excludeId) continue;
+      for (const e of (s.entries || [])) {
+        if (String(e.name).trim().toLowerCase() !== key) continue;
+        const done = (e.sets || []).filter(filled);
+        if (!done.length) continue;
+        const best = done.reduce((a, b) => (+b.w > +a.w ? b : a));
+        return { date: s.date, w: +best.w, r: +best.r };
+      }
+    }
+    return null;
+  }
+  function exerciseSeries(name) {
+    const key = String(name).trim().toLowerCase();
+    const out = [];
+    allSessions().forEach(s => {
+      (s.entries || []).forEach(e => {
+        if (String(e.name).trim().toLowerCase() !== key) return;
+        const done = (e.sets || []).filter(filled);
+        if (!done.length) return;
+        const topW = done.reduce((a, b) => (+b.w > +a.w ? b : a));
+        const bestE = done.reduce((a, b) => (epley(+b.w, +b.r) > epley(+a.w, +a.r) ? b : a));
+        out.push({ date: s.date, order: s.createdAt || 0, weight: +topW.w, reps: +topW.r, e1rm: epley(+bestE.w, +bestE.r) });
+      });
+    });
+    return out.sort(chrono);
+  }
+  function chrono(a, b) {
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return (a.order || 0) - (b.order || 0);
+  }
+  function volumeSeries(limit) {
+    const rows = allSessions().filter(hasData).map(s => ({
+      date: s.date, order: s.createdAt || 0, label: s.routineName || "Session", volume: sessionVolume(s), sets: sessionSets(s)
+    })).sort(chrono);
+    return limit ? rows.slice(-limit) : rows;
+  }
+
+  /* ────────────────────────── tabs ────────────────────────── */
+  const TABS = ["log", "history", "progress", "routines"];
+  function setTab(name, focus) {
+    state.tab = name;
+    TABS.forEach(t => {
+      const btn = $("#tab-" + t), pane = $("#panel-" + t);
+      const on = t === name;
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+      btn.tabIndex = on ? 0 : -1;
+      pane.hidden = !on;
+    });
+    if (focus) $("#tab-" + name).focus();
+    render();
+  }
+  TABS.forEach((t, i) => {
+    const btn = $("#tab-" + t);
+    btn.addEventListener("click", () => setTab(t));
+    btn.addEventListener("keydown", ev => {
+      const k = ev.key;
+      let j = null;
+      if (k === "ArrowRight") j = (i + 1) % TABS.length;
+      else if (k === "ArrowLeft") j = (i - 1 + TABS.length) % TABS.length;
+      else if (k === "Home") j = 0;
+      else if (k === "End") j = TABS.length - 1;
+      if (j !== null) { ev.preventDefault(); setTab(TABS[j], true); }
+    });
+  });
+
+  /* ────────────────────────── render: LOG ────────────────────────── */
+  function startSession(routine) {
+    const s = {
+      id: uid("s_"),
+      date: todayISO(),
+      routineId: routine ? routine.id : null,
+      routineName: routine ? routine.name : "Open session",
+      done: false,
+      createdAt: Date.now(),
+      entries: (routine ? routine.exercises || [] : []).map(x => ({
+        id: uid("e_"), name: x.name,
+        sets: Array.from({ length: Math.max(1, Math.min(12, +x.sets || 3)) }, () => ({ w: "", r: "", m: false }))
+      }))
+    };
+    state.draft = s;
+    touch();
+    queueSession(s, true);
+    upsertLocalSession(s);
+    render();
+    toast(routine ? routine.name + " started" : "Open session started");
+  }
+
+  function routineFromSession(s, name) {
+    const r = {
+      id: uid("r_"),
+      name: (name || "").trim() || (s.routineName && s.routineName !== "Open session" ? s.routineName + " (copy)" : "New routine"),
+      order: state.routines.length + 1,
+      exercises: (s.entries || []).filter(e => String(e.name || "").trim()).map(e => ({
+        id: uid("x_"), name: e.name.trim(), sets: Math.max(1, Math.min(12, (e.sets || []).length || 3))
+      }))
+    };
+    if (!r.exercises.length) { toast("Add an exercise first."); return null; }
+    state.routines.push(r);
+    touch(); queueRoutine(r, true);
+    return r;
+  }
+
+  function renderLog() {
+    const p = $("#panel-log");
+    p.textContent = "";
+    const banner = storageBanner(); if (banner) p.appendChild(banner);
+
+    if (state.loading) {
+      p.appendChild(el("div", { class: "stack" }, [el("div", { class: "skel" }), el("div", { class: "skel" }), el("div", { class: "skel" })]));
+      return;
+    }
+
+    if (!state.draft) {
+      const wrap = el("div", { class: "stack" });
+      wrap.appendChild(el("div", {}, [
+        el("p", { class: "eyebrow", text: "Start a workout" }),
+        el("h2", { class: "sec", text: longDate(todayISO()) })
+      ]));
+      state.routines.forEach(r => {
+        const n = (r.exercises || []).length;
+        wrap.appendChild(el("button", { class: "card routine-pick", onclick: () => startSession(r) }, [
+          el("span", { class: "meta" }, [
+            el("strong", { text: r.name }),
+            el("span", { text: n + (n === 1 ? " exercise" : " exercises") + " · " + (r.exercises || []).slice(0, 3).map(e => e.name).join(", ") + (n > 3 ? "…" : "") })
+          ]),
+          el("span", { class: "go", text: "Start →" })
+        ]));
+      });
+      wrap.appendChild(el("button", { class: "btn", onclick: () => startSession(null) }, [document.createTextNode("Start an open session")]));
+      wrap.appendChild(el("p", { class: "small muted", style: "margin:0", text: state.routines.length
+        ? "An open session starts empty — add exercises as you go, then save the list as a routine if you want it again."
+        : "No routines yet. Start an open session and save it as a routine when you're done, or build one from scratch on the Routines tab." }));
+      wrap.appendChild(el("button", {
+        class: "btn btn-ghost btn-sm", style: "align-self:flex-start", text: "+ Build a new routine",
+        onclick: () => {
+          const r = { id: uid("r_"), name: "New routine", order: state.routines.length + 1, exercises: [{ id: uid("x_"), name: "", sets: 3 }] };
+          state.routines.push(r); touch(); queueRoutine(r, true);
+          state.focusRoutine = r.id; setTab("routines");
+        }
+      }));
+      p.appendChild(wrap);
+      return;
+    }
+
+    const s = state.draft;
+    const wrap = el("div", { class: "stack" });
+
+    /* session header */
+    const dateInput = el("input", {
+      type: "date", id: "sessDate", value: s.date,
+      oninput: ev => { s.date = ev.target.value || todayISO(); touch(); queueSession(s); updateTallies(); }
+    });
+    const tallies = el("div", { class: "tallies", id: "tallies" });
+    wrap.appendChild(el("div", { class: "card session-head" }, [
+      el("div", { class: "row" }, [
+        el("div", { class: "session-title" }, [
+          el("p", { class: "eyebrow", text: "Logging now", style: "margin:0" }),
+          el("strong", { text: s.routineName || "Open session" })
+        ]),
+        el("label", { class: "fld", style: "flex:0 0 150px" }, [el("span", { text: "Date" }), dateInput])
+      ]),
+      tallies
+    ]));
+
+    /* exercises */
+    (s.entries || []).forEach((entry, ei) => wrap.appendChild(renderExercise(s, entry, ei)));
+
+    /* add exercise */
+    const names = exerciseNames();
+    const dl = el("datalist", { id: "exLibrary" });
+    names.forEach(n => dl.appendChild(el("option", { value: n })));
+    const nameIn = el("input", { type: "text", class: "txt", id: "newExName", list: "exLibrary", placeholder: "e.g. Pec Deck Chest Fly", autocomplete: "off" });
+    const setsIn = el("input", { type: "number", id: "newExSets", value: "3", min: "1", max: "12", step: "1" });
+    const add = () => {
+      const nm = nameIn.value.trim();
+      if (!nm) { nameIn.focus(); toast("Name the exercise first."); return; }
+      const count = Math.max(1, Math.min(12, +setsIn.value || 3));
+      s.entries.push({ id: uid("e_"), name: nm, sets: Array.from({ length: count }, () => ({ w: "", r: "", m: false })) });
+      touch(); queueSession(s, true); render();
+      toast(nm + " added");
+    };
+    wrap.appendChild(el("div", { class: "card addex" }, [
+      el("p", { class: "eyebrow", text: "Add an exercise", style: "margin:0" }),
+      el("div", { class: "grid" }, [
+        el("label", { class: "fld" }, [el("span", { text: "Exercise" }), nameIn]),
+        el("label", { class: "fld" }, [el("span", { text: "Sets" }), setsIn])
+      ]),
+      dl,
+      el("button", { class: "btn btn-primary", onclick: add, text: "Add to session" })
+    ]));
+
+    /* save an open session as a reusable routine */
+    if (!s.routineId) {
+      const nameIn2 = el("input", { type: "text", class: "txt", id: "saveRoutineName", placeholder: "e.g. Arms and Chest", autocomplete: "off" });
+      wrap.appendChild(el("div", { class: "card addex" }, [
+        el("p", { class: "eyebrow", text: "Save for next time", style: "margin:0" }),
+        el("p", { class: "small muted", style: "margin:0", text: "Turn this exercise list into a routine you can start with one tap — no re-entering." }),
+        el("label", { class: "fld" }, [el("span", { text: "Routine name" }), nameIn2]),
+        el("button", {
+          class: "btn", text: "Save as a routine",
+          onclick: () => {
+            const r = routineFromSession(s, nameIn2.value);
+            if (!r) return;
+            s.routineId = r.id; s.routineName = r.name; queueSession(s, true);
+            render(); toast("“" + r.name + "” saved to your routines");
+          }
+        })
+      ]));
+    }
+
+    /* finish / discard */
+    wrap.appendChild(el("div", { class: "btn-row", style: "margin-top:2px" }, [
+      el("button", {
+        class: "btn btn-primary", style: "flex:1 1 auto",
+        onclick: () => {
+          if (!hasData(s)) { toast("Log at least one set with weight and reps first."); return; }
+          s.done = true; touch(); queueSession(s, true);
+          upsertLocalSession(s);
+          state.draft = null; state.openHistory = s.id;
+          render(); setTab("history");
+          toast("Session saved · " + fmt(sessionVolume(s)) + " lb total volume");
+        }
+      }, [document.createTextNode("Finish session")]),
+      hasData(s)
+        ? confirmButton("Discard", "Discard this session and everything logged in it?", () => {
+            removeSession(s.id); state.draft = null; touch(); render(); toast("Session discarded");
+          })
+        : el("button", {
+            class: "btn btn-danger",
+            onclick: () => { removeSession(s.id); state.draft = null; touch(); render(); toast("Session discarded"); }
+          }, [document.createTextNode("Discard")])
+    ]));
+
+    p.appendChild(wrap);
+    updateTallies();
+  }
+
+  function updateTallies() {
+    const box = $("#tallies");
+    if (!box || !state.draft) return;
+    const s = state.draft;
+    box.textContent = "";
+    [["Volume", fmt(sessionVolume(s)) + " lb"], ["Sets", String(sessionSets(s))], ["Exercises", String((s.entries || []).length)]]
+      .forEach(([k, v]) => box.appendChild(el("div", { class: "tally" }, [el("b", { text: v }), el("span", { text: k })])));
+  }
+
+  function renderExercise(s, entry, ei) {
+    const card = el("div", { class: "card ex" });
+    const last = lastPerformance(entry.name, s.id);
+    const nameId = "exname_" + entry.id;
+
+    card.appendChild(el("div", { class: "ex-head" }, [
+      el("h3", { class: "ex-name", id: nameId, text: entry.name }),
+      last ? el("span", { class: "ex-last", text: "last " + last.w + "×" + last.r }) : null,
+      el("button", {
+        class: "x", "aria-label": "Remove " + entry.name + " from this session", title: "Remove exercise",
+        onclick: () => { s.entries.splice(ei, 1); touch(); queueSession(s, true); render(); }
+      }, [document.createTextNode("×")])
+    ]));
+
+    const group = el("div", { role: "group", "aria-labelledby": nameId });
+    (entry.sets || []).forEach((st, si) => {
+      const row = el("div", { class: "set-row" + (st.m ? " is-top" : "") });
+      const wId = "w_" + entry.id + "_" + si, rId = "r_" + entry.id + "_" + si;
+      const wIn = el("input", {
+        type: "number", id: wId, class: "w", value: st.w === null || st.w === undefined ? "" : st.w,
+        min: "0", step: "0.5", inputmode: "decimal", "aria-label": "Set " + (si + 1) + " weight in pounds",
+        placeholder: last ? String(last.w) : "lb",
+        oninput: ev => { st.w = ev.target.value; touch(); queueSession(s); updateTallies(); }
+      });
+      const rIn = el("input", {
+        type: "number", id: rId, class: "r", value: st.r === null || st.r === undefined ? "" : st.r,
+        min: "0", step: "1", inputmode: "numeric", "aria-label": "Set " + (si + 1) + " reps",
+        placeholder: last ? String(last.r) : "reps",
+        oninput: ev => { st.r = ev.target.value; touch(); queueSession(s); updateTallies(); }
+      });
+      const mark = el("button", {
+        class: "mark", "aria-pressed": st.m ? "true" : "false",
+        "aria-label": "Set " + (si + 1) + " marked as top set",
+        onclick: ev => {
+          st.m = !st.m; touch(); queueSession(s);
+          ev.currentTarget.setAttribute("aria-pressed", st.m ? "true" : "false");
+          row.classList.toggle("is-top", st.m);
+        }
+      }, [el("span", { class: "dot", "aria-hidden": "true" }), document.createTextNode("top")]);
+
+      row.append(
+        el("span", { class: "set-n", "aria-hidden": "true", text: String(si + 1) }),
+        wIn, el("span", { class: "unit", "aria-hidden": "true", text: "lb" }),
+        el("span", { class: "times", "aria-hidden": "true", text: "×" }),
+        rIn, mark,
+        el("button", {
+          class: "x", "aria-label": "Delete set " + (si + 1) + " of " + entry.name,
+          onclick: () => { entry.sets.splice(si, 1); touch(); queueSession(s, true); render(); }
+        }, [document.createTextNode("×")])
+      );
+      group.appendChild(row);
+    });
+    card.appendChild(group);
+
+    card.appendChild(el("div", { class: "ex-foot" }, [
+      el("button", {
+        class: "btn btn-ghost btn-sm",
+        onclick: () => {
+          const prev = (entry.sets || [])[entry.sets.length - 1];
+          entry.sets.push({ w: prev ? prev.w : "", r: prev ? prev.r : "", m: false });
+          touch(); queueSession(s, true); render();
+          const inputs = document.querySelectorAll("#w_" + entry.id + "_" + (entry.sets.length - 1));
+          if (inputs[0]) inputs[0].focus();
+        },
+        text: "+ Add set"
+      })
+    ]));
+    return card;
+  }
+
+  /* ────────────────────────── render: HISTORY ────────────────────────── */
+  function renderHistory() {
+    const p = $("#panel-history");
+    p.textContent = "";
+    const banner = storageBanner(); if (banner) p.appendChild(banner);
+    const list = allSessions();
+    const wrap = el("div", { class: "stack" });
+    wrap.appendChild(el("div", {}, [
+      el("p", { class: "eyebrow", text: "Workout log" }),
+      el("h2", { class: "sec", text: list.length ? list.length + (list.length === 1 ? " session" : " sessions") : "No sessions yet" })
+    ]));
+
+    if (!list.length) {
+      wrap.appendChild(el("div", { class: "card empty" }, [
+        el("p", { text: "Finished workouts land here — tap one to see every set." }),
+        el("button", { class: "btn btn-primary", onclick: () => setTab("log"), text: "Go to Log" })
+      ]));
+      p.appendChild(wrap); return;
+    }
+
+    list.forEach(s => {
+      const open = state.openHistory === s.id;
+      const card = el("div", { class: "card" });
+      card.appendChild(el("button", {
+        class: "hist", "aria-expanded": open ? "true" : "false",
+        onclick: () => { state.openHistory = open ? null : s.id; renderHistory(); }
+      }, [
+        el("span", { class: "d", text: shortDate(s.date) }),
+        el("span", { class: "n" }, [
+          el("strong", { text: s.routineName || "Session" }),
+          el("span", { text: sessionSets(s) + " sets · " + fmt(sessionVolume(s)) + " lb" })
+        ]),
+        s.done ? null : el("span", { class: "chip", text: "In progress" }),
+        el("span", { "aria-hidden": "true", class: "muted", text: open ? "▲" : "▼" })
+      ]));
+
+      if (open) {
+        const d = el("div", { class: "detail" });
+        const table = el("table");
+        table.appendChild(el("thead", {}, [el("tr", {}, [
+          el("th", { text: "Exercise" }), el("th", { style: "text-align:right", text: "Sets logged" })
+        ])]));
+        const tb = el("tbody");
+        (s.entries || []).forEach(e => {
+          const done = (e.sets || []).filter(filled);
+          const cell = el("td", { class: "sets" });
+          if (!done.length) cell.appendChild(el("span", { class: "muted", text: "—" }));
+          else done.forEach((st, i) => {
+            cell.appendChild(el("span", { class: st.m ? "top" : "", text: (i ? "  " : "") + st.w + "×" + st.r + (st.m ? "◉" : "") }));
+          });
+          tb.appendChild(el("tr", {}, [el("td", { text: e.name }), cell]));
+        });
+        table.appendChild(tb);
+        d.appendChild(el("div", { class: "scroll-x" }, [table]));
+        d.appendChild(el("p", { class: "small muted", style: "margin:10px 0 0", text: longDate(s.date) + " · ◉ marks a top set" }));
+        d.appendChild(el("div", { class: "btn-row", style: "margin-top:10px" }, [
+          s.done ? el("button", {
+            class: "btn btn-sm",
+            onclick: () => {
+              if (state.draft && state.draft.id !== s.id) { toast("Finish or discard the session you're logging first."); return; }
+              s.done = false; state.draft = clone(s); touch(); queueSession(state.draft, true); render(); setTab("log");
+            }, text: "Reopen and edit"
+          }) : el("button", { class: "btn btn-sm", onclick: () => setTab("log"), text: "Continue logging" }),
+          el("button", {
+            class: "btn btn-sm", text: "Save as a routine",
+            onclick: () => {
+              const r = routineFromSession(s, s.routineName && s.routineName !== "Open session" ? s.routineName + " (copy)" : "");
+              if (!r) return;
+              state.focusRoutine = r.id; setTab("routines");
+              toast("Routine created — give it a name");
+            }
+          }),
+          confirmButton("Delete", "Delete the " + shortDate(s.date) + " session? This can't be undone.", () => {
+            if (state.draft && state.draft.id === s.id) state.draft = null;
+            removeSession(s.id); state.openHistory = null; touch(); render(); toast("Session deleted");
+          })
+        ]));
+        card.appendChild(d);
+      }
+      wrap.appendChild(card);
+    });
+    p.appendChild(wrap);
+  }
+
+  /* ────────────────────────── charts ────────────────────────── */
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const svg = (t, a) => { const n = document.createElementNS(SVGNS, t); for (const k in a) if (a[k] !== null && a[k] !== undefined) n.setAttribute(k, a[k]); return n; };
+  function niceTicks(max, count) {
+    if (max <= 0) return [0, 1];
+    const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw) || 10 * mag;
+    const top = Math.ceil(max / step) * step;
+    const out = []; for (let v = 0; v <= top + 1e-9; v += step) out.push(Math.round(v * 1000) / 1000);
+    return out;
+  }
+
+  function lineChart(rows, opts) {
+    const W = 700, H = 300, m = { t: 14, r: 16, b: 34, l: 46 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const ticks = niceTicks(Math.max.apply(null, rows.map(r => Math.max(r.e1rm, r.weight))), 4);
+    const yMax = ticks[ticks.length - 1];
+    const x = i => rows.length === 1 ? m.l + pw / 2 : m.l + (pw * i) / (rows.length - 1);
+    const y = v => m.t + ph - (ph * v) / yMax;
+
+    const root = svg("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": opts.aria });
+    ticks.forEach(t => {
+      root.appendChild(svg("line", { x1: m.l, x2: m.l + pw, y1: y(t), y2: y(t), stroke: t === 0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }));
+      const lab = svg("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 12, "font-family": "ui-monospace, Menlo, monospace" });
+      lab.textContent = t >= 1000 ? Math.round(t / 1000) + "k" : t;
+      root.appendChild(lab);
+    });
+    const step = Math.ceil(rows.length / 6) || 1;
+    rows.forEach((r, i) => {
+      if (i % step && i !== rows.length - 1) return;
+      const lab = svg("text", { x: x(i), y: H - 12, "text-anchor": i === 0 ? "start" : (i === rows.length - 1 ? "end" : "middle"), fill: "var(--muted)", "font-size": 12, "font-family": "ui-monospace, Menlo, monospace" });
+      lab.textContent = shortDate(r.date);
+      root.appendChild(lab);
+    });
+
+    [["e1rm", "var(--series-2)"], ["weight", "var(--series-1)"]].forEach(([key, color]) => {
+      const d = rows.map((r, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(r[key]).toFixed(1)).join(" ");
+      root.appendChild(svg("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      rows.forEach((r, i) => {
+        root.appendChild(svg("circle", { cx: x(i), cy: y(r[key]), r: 5, fill: color, stroke: "var(--surface)", "stroke-width": 2 }));
+      });
+      const lastI = rows.length - 1;
+      const lab = svg("text", { x: x(lastI), y: y(rows[lastI][key]) - 12, "text-anchor": "end", fill: "var(--ink-2)", "font-size": 12.5, "font-weight": 600, "font-family": "ui-monospace, Menlo, monospace" });
+      lab.textContent = fmt(rows[lastI][key]);
+      root.appendChild(lab);
+    });
+
+    const cross = svg("line", { y1: m.t, y2: m.t + ph, stroke: "var(--line)", "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 });
+    root.appendChild(cross);
+    const hit = svg("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "transparent" });
+    root.appendChild(hit);
+
+    const plot = el("div", { class: "plot" }, [root]);
+    const tip = el("div", { class: "tip", hidden: "hidden" });
+    plot.appendChild(tip);
+
+    function show(i) {
+      const r = rows[i];
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
+      tip.hidden = false;
+      tip.textContent = "";
+      tip.appendChild(el("div", { class: "t", text: shortDate(r.date) }));
+      tip.appendChild(el("div", { class: "v" }, [el("span", { class: "swatch", style: "background:var(--series-1)" }), document.createTextNode("Top set " + fmt(r.weight) + "×" + r.reps)]));
+      tip.appendChild(el("div", { class: "v" }, [el("span", { class: "swatch", style: "background:var(--series-2)" }), document.createTextNode("Est. 1RM " + fmt(r.e1rm) + " lb")]));
+      tip.style.left = (x(i) / W * 100) + "%";
+      tip.style.top = Math.max(38, y(Math.max(r.e1rm, r.weight)) / H * plot.clientHeight - 8) + "px";
+    }
+    function hide() { cross.setAttribute("opacity", 0); tip.hidden = true; }
+    root.addEventListener("pointermove", ev => {
+      const b = root.getBoundingClientRect();
+      const px = ((ev.clientX - b.left) / b.width) * W;
+      if (px < m.l - 12 || px > m.l + pw + 12) { hide(); return; }
+      const i = rows.length === 1 ? 0 : Math.max(0, Math.min(rows.length - 1, Math.round(((px - m.l) / pw) * (rows.length - 1))));
+      show(i);
+    });
+    root.addEventListener("pointerleave", hide);
+    return { plot: plot, show: show, hide: hide };
+  }
+
+  function barChart(rows, opts) {
+    const W = 700, H = 260, m = { t: 14, r: 12, b: 34, l: 52 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const ticks = niceTicks(Math.max.apply(null, rows.map(r => r.volume)), 4);
+    const yMax = ticks[ticks.length - 1];
+    const slot = pw / rows.length;
+    const bw = Math.max(6, Math.min(46, slot - 2));
+    const y = v => m.t + ph - (ph * v) / yMax;
+
+    const root = svg("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": opts.aria });
+    ticks.forEach(t => {
+      root.appendChild(svg("line", { x1: m.l, x2: m.l + pw, y1: y(t), y2: y(t), stroke: t === 0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }));
+      const lab = svg("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 12, "font-family": "ui-monospace, Menlo, monospace" });
+      lab.textContent = t >= 1000 ? Math.round(t / 100) / 10 + "k" : t;
+      root.appendChild(lab);
+    });
+
+    const plot = el("div", { class: "plot" }, [root]);
+    const tip = el("div", { class: "tip", hidden: "hidden" });
+
+    const step = Math.ceil(rows.length / 6) || 1;
+    rows.forEach((r, i) => {
+      const cx = m.l + slot * i + slot / 2;
+      const h = Math.max(2, y(0) - y(r.volume));
+      const bar = svg("rect", { x: cx - bw / 2, y: y(r.volume), width: bw, height: h, rx: 4, fill: "var(--series-1)" });
+      bar.addEventListener("pointerenter", () => {
+        tip.hidden = false; tip.textContent = "";
+        tip.appendChild(el("div", { class: "t", text: shortDate(r.date) }));
+        tip.appendChild(el("div", { class: "v", text: fmt(r.volume) + " lb · " + r.sets + " sets" }));
+        tip.appendChild(el("div", { class: "small muted", text: r.label }));
+        tip.style.left = (cx / W * 100) + "%";
+        tip.style.top = Math.max(40, (y(r.volume) / H) * plot.clientHeight - 8) + "px";
+      });
+      bar.addEventListener("pointerleave", () => { tip.hidden = true; });
+      root.appendChild(bar);
+      if (!(i % step) || i === rows.length - 1) {
+        const lab = svg("text", { x: cx, y: H - 12, "text-anchor": "middle", fill: "var(--muted)", "font-size": 12, "font-family": "ui-monospace, Menlo, monospace" });
+        lab.textContent = shortDate(r.date);
+        root.appendChild(lab);
+      }
+    });
+    plot.appendChild(tip);
+    return plot;
+  }
+
+  function dataTable(head, rows) {
+    const t = el("table", { class: "dtable" });
+    t.appendChild(el("thead", {}, [el("tr", {}, head.map(h => el("th", { scope: "col", text: h })))]));
+    t.appendChild(el("tbody", {}, rows.map(r => el("tr", {}, r.map((c, i) => i ? el("td", { text: c }) : el("th", { scope: "row", text: c }))))));
+    return el("div", { class: "scroll-x" }, [t]);
+  }
+
+  /* ────────────────────────── render: PROGRESS ────────────────────────── */
+  function renderProgress() {
+    const p = $("#panel-progress");
+    p.textContent = "";
+    const banner = storageBanner(); if (banner) p.appendChild(banner);
+    const wrap = el("div", { class: "stack" });
+    const names = loggedExerciseNames();
+
+    wrap.appendChild(el("div", {}, [
+      el("p", { class: "eyebrow", text: "Progress" }),
+      el("h2", { class: "sec", text: "How it's trending" })
+    ]));
+
+    if (!names.length) {
+      wrap.appendChild(el("div", { class: "card empty" }, [
+        el("p", { text: "Log a couple of sessions and your charts appear here." }),
+        el("button", { class: "btn btn-primary", onclick: () => setTab("log"), text: "Go to Log" })
+      ]));
+      p.appendChild(wrap); return;
+    }
+
+    if (!state.chartExercise || names.indexOf(state.chartExercise) < 0) state.chartExercise = names[0];
+    const rows = exerciseSeries(state.chartExercise);
+
+    /* per-exercise weight chart */
+    const sel = el("select", { id: "exSel", "aria-label": "Exercise to chart", onchange: ev => { state.chartExercise = ev.target.value; renderProgress(); } });
+    names.forEach(n => sel.appendChild(el("option", { value: n, selected: n === state.chartExercise ? "selected" : null, text: n })));
+
+    const card1 = el("div", { class: "card chart-card" });
+    card1.appendChild(el("div", { class: "chart-head" }, [
+      el("h3", { class: "sec", style: "font-size:19px", text: "Weight over time" }),
+    ]));
+    card1.appendChild(el("label", { class: "fld", style: "margin:6px 0 10px" }, [el("span", { text: "Exercise" }), sel]));
+
+    if (!rows.length) {
+      card1.appendChild(el("p", { class: "small muted", text: "Nothing logged for this exercise yet." }));
+    } else {
+      if (rows.length === 1) {
+        card1.appendChild(el("p", { class: "small muted", style: "margin:0 0 6px", text: "One session so far — the next one draws the trend line." }));
+      }
+      card1.appendChild(el("div", { class: "legend" }, [
+        el("span", {}, [el("span", { class: "swatch", style: "background:var(--series-1)" }), document.createTextNode("Top set weight")]),
+        el("span", {}, [el("span", { class: "swatch", style: "background:var(--series-2)" }), document.createTextNode("Estimated 1RM")])
+      ]));
+      const first = rows[0], last = rows[rows.length - 1];
+      const chart = lineChart(rows, { aria: "Line chart of " + state.chartExercise + ": top-set weight rose from " + fmt(first.weight) + " to " + fmt(last.weight) + " pounds, and estimated one-rep max from " + fmt(first.e1rm) + " to " + fmt(last.e1rm) + " pounds, across " + rows.length + " sessions between " + shortDate(first.date) + " and " + shortDate(last.date) + "." });
+      card1.appendChild(chart.plot);
+
+      const best = rows.reduce((a, b) => (b.weight > a.weight ? b : a));
+      const delta = last.weight - first.weight;
+      const stats = el("div", { class: "stat-row" });
+      const tiles = [["Latest top set", fmt(last.weight) + " × " + last.reps],
+       ["Heaviest set", fmt(best.weight) + " lb · " + shortDate(best.date)]];
+      if (rows.length > 1) tiles.push(["Since " + shortDate(first.date), (delta >= 0 ? "+" : "−") + fmt(Math.abs(delta)) + " lb"]);
+      tiles.forEach(([k, v]) => stats.appendChild(el("div", { class: "tally" }, [
+          el("b", { text: v, style: k.indexOf("Since") === 0 && delta > 0 ? "color:var(--good)" : "" }),
+          el("span", { text: k })
+        ])));
+      card1.appendChild(stats);
+
+      const tblWrap = el("div", { id: "lineTable", hidden: state.showLineTable ? null : "hidden" }, [
+        dataTable(["Date", "Top set", "Reps", "Est. 1RM"], rows.slice().reverse().map(r => [shortDate(r.date), fmt(r.weight) + " lb", String(r.reps), fmt(r.e1rm) + " lb"]))
+      ]);
+      card1.appendChild(el("button", {
+        class: "btn btn-ghost btn-sm", "aria-expanded": state.showLineTable ? "true" : "false", "aria-controls": "lineTable",
+        style: "margin-top:6px",
+        onclick: () => { state.showLineTable = !state.showLineTable; renderProgress(); },
+        text: (state.showLineTable ? "Hide" : "Show") + " the numbers"
+      }));
+      card1.appendChild(tblWrap);
+    }
+    wrap.appendChild(card1);
+
+    /* volume chart */
+    const vol = volumeSeries(24);
+    const card2 = el("div", { class: "card chart-card" });
+    card2.appendChild(el("h3", { class: "sec", style: "font-size:19px", text: "Volume per session" }));
+    card2.appendChild(el("p", { class: "small muted", style: "margin:4px 0 8px", text: "Weight × reps, added up across every logged set." }));
+    if (!vol.length) {
+      card2.appendChild(el("p", { class: "small muted", text: "No completed sets yet." }));
+    } else {
+      card2.appendChild(barChart(vol, { aria: "Bar chart of total volume per session, from " + fmt(vol[0].volume) + " pounds on " + shortDate(vol[0].date) + " to " + fmt(vol[vol.length - 1].volume) + " pounds on " + shortDate(vol[vol.length - 1].date) + ", across " + vol.length + " sessions." }));
+      const avg = vol.reduce((a, b) => a + b.volume, 0) / vol.length;
+      const stats = el("div", { class: "stat-row" });
+      [["Last session", fmt(vol[vol.length - 1].volume) + " lb"], ["Average", fmt(avg) + " lb"], ["Sessions", String(vol.length)]]
+        .forEach(([k, v]) => stats.appendChild(el("div", { class: "tally" }, [el("b", { text: v }), el("span", { text: k })])));
+      card2.appendChild(stats);
+      const tblWrap = el("div", { id: "volTable", hidden: state.showVolTable ? null : "hidden" }, [
+        dataTable(["Date", "Session", "Sets", "Volume"], vol.slice().reverse().map(r => [shortDate(r.date), r.label, String(r.sets), fmt(r.volume) + " lb"]))
+      ]);
+      card2.appendChild(el("button", {
+        class: "btn btn-ghost btn-sm", "aria-expanded": state.showVolTable ? "true" : "false", "aria-controls": "volTable",
+        style: "margin-top:6px",
+        onclick: () => { state.showVolTable = !state.showVolTable; renderProgress(); },
+        text: (state.showVolTable ? "Hide" : "Show") + " the numbers"
+      }));
+      card2.appendChild(tblWrap);
+    }
+    wrap.appendChild(card2);
+    p.appendChild(wrap);
+  }
+
+  /* ────────────────────────── render: ROUTINES ────────────────────────── */
+  function renderRoutines() {
+    const p = $("#panel-routines");
+    p.textContent = "";
+    const banner = storageBanner(); if (banner) p.appendChild(banner);
+    const wrap = el("div", { class: "stack" });
+    wrap.appendChild(el("div", {}, [
+      el("p", { class: "eyebrow", text: "Routines" }),
+      el("h2", { class: "sec", text: "Your workout templates" }),
+      el("p", { class: "small muted", style: "margin:6px 0 0", text: "A routine is a named list of exercises and how many sets each starts with — “Arms and Chest”, “Leg Day”, whatever you call it. Starting one pre-fills the session, and you can still add or drop anything mid-workout." })
+    ]));
+
+    state.routines.forEach(r => {
+      const card = el("div", { class: "card r-edit" });
+      const nameField = el("input", {
+        type: "text", class: "txt", value: r.name || "", placeholder: "e.g. Arms and Chest",
+        oninput: ev => { r.name = ev.target.value; touch(); queueRoutine(r); }
+      });
+      card.appendChild(el("label", { class: "fld", style: "margin-bottom:12px" }, [
+        el("span", { text: "Routine name" }), nameField
+      ]));
+      if (state.focusRoutine === r.id) {
+        state.focusRoutine = null;
+        setTimeout(() => { nameField.focus(); nameField.select(); nameField.scrollIntoView({ block: "center", behavior: "smooth" }); }, 40);
+      }
+      card.appendChild(el("div", { class: "r-row" }, [
+        el("span", { class: "eyebrow lbl", style: "margin:0", text: "Exercise" }),
+        el("span", { class: "eyebrow lbl", style: "margin:0", text: "Sets" }),
+        el("span")
+      ]));
+      (r.exercises || []).forEach((x, i) => {
+        card.appendChild(el("div", { class: "r-row" }, [
+          el("input", {
+            type: "text", class: "txt", value: x.name || "", "aria-label": "Exercise " + (i + 1) + " name",
+            oninput: ev => { x.name = ev.target.value; touch(); queueRoutine(r); }
+          }),
+          el("input", {
+            type: "number", value: x.sets || 3, min: "1", max: "12", step: "1", "aria-label": "Sets for " + (x.name || "exercise " + (i + 1)),
+            oninput: ev => { x.sets = Math.max(1, Math.min(12, +ev.target.value || 1)); touch(); queueRoutine(r); }
+          }),
+          el("button", {
+            class: "x", "aria-label": "Remove " + (x.name || "exercise " + (i + 1)) + " from " + (r.name || "routine"),
+            onclick: () => { r.exercises.splice(i, 1); touch(); queueRoutine(r, true); renderRoutines(); }
+          }, [document.createTextNode("×")])
+        ]));
+      });
+      card.appendChild(el("div", { class: "btn-row", style: "margin-top:6px" }, [
+        el("button", {
+          class: "btn btn-ghost btn-sm", text: "+ Add exercise",
+          onclick: () => { (r.exercises = r.exercises || []).push({ id: uid("x_"), name: "", sets: 3 }); touch(); queueRoutine(r, true); renderRoutines(); }
+        }),
+        confirmButton("Delete routine", "Delete “" + (r.name || "Untitled") + "”? Sessions you already logged from it are kept.", () => {
+          removeRoutine(r.id); touch(); renderRoutines(); toast("Routine deleted");
+        })
+      ]));
+      wrap.appendChild(card);
+    });
+
+    wrap.appendChild(el("button", {
+      class: "btn", text: "+ New routine",
+      onclick: () => {
+        const r = { id: uid("r_"), name: "New routine", order: state.routines.length + 1, exercises: [{ id: uid("x_"), name: "", sets: 3 }] };
+        state.routines.push(r); touch(); queueRoutine(r, true);
+        state.focusRoutine = r.id; renderRoutines();
+      }
+    }));
+
+    /* backup & restore */
+    const dataCard = el("div", { class: "card r-edit" });
+    dataCard.appendChild(el("p", { class: "eyebrow", text: "Backup" }));
+    dataCard.appendChild(el("p", { class: "small muted", style: "margin:0 0 10px", text: "This copy keeps your log inside this browser only. Nothing leaves the phone, and nothing syncs — so take a backup now and then, especially before clearing browsing data or switching phones." }));
+    const row = el("div", { class: "btn-row" });
+    row.appendChild(el("button", { class: "btn btn-sm", text: "Save backup file", onclick: () => saveFile("set-ledger-" + todayISO() + ".json", backupText(), "application/json") }));
+    row.appendChild(el("button", { class: "btn btn-sm", text: "Copy backup", onclick: () => copyText(backupText(), "Backup copied — paste it somewhere safe") }));
+    row.appendChild(el("button", { class: "btn btn-sm", text: "Save CSV", onclick: () => saveFile("set-ledger-" + todayISO() + ".csv", csvText(), "text/csv") }));
+    dataCard.appendChild(row);
+
+    const paste = el("textarea", { class: "paste", id: "restoreBox", placeholder: "Paste a backup here", "aria-label": "Backup to restore" });
+    const restoreWrap = el("div", { id: "restoreWrap", hidden: state.showRestore ? null : "hidden", style: "margin-top:10px" }, [
+      paste,
+      el("div", { class: "btn-row", style: "margin-top:8px" }, [
+        el("button", {
+          class: "btn btn-sm btn-primary", text: "Restore",
+          onclick: () => {
+            let data = null;
+            try { data = JSON.parse(paste.value); } catch (e) { toast("That doesn't look like a backup — paste the whole thing."); return; }
+            if (!data || (!Array.isArray(data.routines) && !Array.isArray(data.sessions))) { toast("No routines or sessions found in that backup."); return; }
+            state.routines = data.routines || [];
+            state.sessions = data.sessions || [];
+            const act = state.sessions.find(x => !x.done);
+            state.draft = act ? clone(act) : null;
+            localWrite(); state.showRestore = false; render();
+            toast("Restored " + state.sessions.length + " sessions and " + state.routines.length + " routines");
+          }
+        })
+      ])
+    ]);
+    dataCard.appendChild(el("button", {
+      class: "btn btn-ghost btn-sm", style: "margin-top:8px",
+      "aria-expanded": state.showRestore ? "true" : "false", "aria-controls": "restoreWrap",
+      text: state.showRestore ? "Cancel restore" : "Restore from a backup",
+      onclick: () => { state.showRestore = !state.showRestore; renderRoutines(); }
+    }));
+    dataCard.appendChild(restoreWrap);
+    wrap.appendChild(dataCard);
+    p.appendChild(wrap);
+  }
+
+  function csvText() {
+    const rows = [["date", "session", "exercise", "set", "weight_lb", "reps", "top_set", "est_1rm_lb"]];
+    allSessions().slice().reverse().forEach(s => {
+      (s.entries || []).forEach(e => {
+        (e.sets || []).forEach((st, i) => {
+          if (!filled(st)) return;
+          rows.push([s.date, s.routineName || "Session", e.name, i + 1, st.w, st.r, st.m ? "yes" : "no", Math.round(epley(+st.w, +st.r) * 10) / 10]);
+        });
+      });
+    });
+    return rows.map(r => r.map(c => { const v = String(c); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(",")).join("\n");
+  }
+  function backupText() {
+    return JSON.stringify({ app: "Set Ledger", exportedAt: new Date().toISOString(), routines: state.routines, sessions: allSessions() }, null, 2);
+  }
+  async function copyText(text, okMsg) {
+    try { await navigator.clipboard.writeText(text); toast(okMsg); return; }
+    catch (e) { /* fall through */ }
+    const ta = el("textarea", { style: "position:fixed;top:0;left:0;opacity:0" });
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    let done = false;
+    try { done = document.execCommand("copy"); } catch (e) { done = false; }
+    document.body.removeChild(ta);
+    toast(done ? okMsg : "Couldn't copy here — use Save backup file instead.");
+  }
+  function saveFile(filename, text, mime) {
+    try {
+      const blob = new Blob([text], { type: mime + ";charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = el("a", { href: url, download: filename });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast("Saved as " + filename);
+    } catch (e) {
+      copyText(text, "Couldn't save a file here — copied to your clipboard instead");
+    }
+  }
+
+  /* ────────────────────────── render ────────────────────────── */
+  function storageBanner() {
+    if (state.storageOK !== false) return null;
+    return el("div", { class: "warn small" }, [
+      el("strong", { text: "This browser isn't letting the page save." }),
+      document.createTextNode("Everything you log will be gone when you close the tab. Try opening the file in your normal browser instead of a private window, and use Copy backup on the Routines tab before you close it.")
+    ]);
+  }
+
+  function render() {
+    if (state.tab === "log") renderLog();
+    else if (state.tab === "history") renderHistory();
+    else if (state.tab === "progress") renderProgress();
+    else renderRoutines();
+  }
+
+  render();
+  boot();
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () { /* app still runs without it */ });
+  });
+}
+</script>
+</body>
+</html>
