@@ -1,6 +1,6 @@
 /* Set Ledger service worker — caches the app so it opens with no signal.
    Bump CACHE when you change any file, so phones pick the new version up. */
-const CACHE = "set-ledger-v1";
+const CACHE = "set-ledger-v2";
 const ASSETS = [
   "./",
   "./index.html",

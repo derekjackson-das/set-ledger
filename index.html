@@ -133,6 +133,22 @@ body {
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .tab:hover { color: var(--ink); }
 
+.timerbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0 10px; border-top: 1px solid var(--hair); margin-top: 2px;
+}
+.t-clock {
+  font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 700; font-size: 30px; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: .01em; min-width: 84px;
+}
+.t-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); flex: none; }
+.timerbar.running .t-dot { background: var(--good); }
+.timerbar.running .t-clock { color: var(--accent); }
+.t-label {
+  flex: 1 1 auto; font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600; font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.timerbar .btn { min-height: 40px; }
 main { flex: 1 1 auto; padding: 16px 14px 40px; }
 [role="tabpanel"]:focus-visible, .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
   outline: 3px solid var(--series-1); outline-offset: 2px; border-radius: 6px;
@@ -349,6 +365,13 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       <button class="tab" role="tab" id="tab-history"  aria-controls="panel-history"  aria-selected="false" tabindex="-1">History</button>
       <button class="tab" role="tab" id="tab-progress" aria-controls="panel-progress" aria-selected="false" tabindex="-1">Progress</button>
       <button class="tab" role="tab" id="tab-routines" aria-controls="panel-routines" aria-selected="false" tabindex="-1">Routines</button>
+    </div>
+    <div class="timerbar" id="timerBar" hidden>
+      <span class="t-dot" id="tDot" aria-hidden="true"></span>
+      <span class="t-clock" id="tClock" role="timer" aria-label="Elapsed time">0:00</span>
+      <span class="t-label" id="tLabel">Timer</span>
+      <button class="btn btn-sm btn-primary" id="tGo" type="button">Start</button>
+      <button class="btn btn-sm" id="tReset" type="button">Reset</button>
     </div>
   </header>
 
@@ -704,6 +727,8 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     }));
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }
+  /* The last time this exercise was logged, set by set — so each row can show
+     what that same set was last time, not just the heaviest one. */
   function lastPerformance(name, excludeId) {
     const key = String(name).trim().toLowerCase();
     for (const s of allSessions()) {
@@ -712,11 +737,17 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
         if (String(e.name).trim().toLowerCase() !== key) continue;
         const done = (e.sets || []).filter(filled);
         if (!done.length) continue;
-        const best = done.reduce((a, b) => (+b.w > +a.w ? b : a));
-        return { date: s.date, w: +best.w, r: +best.r };
+        const sets = done.map(st => ({ w: +st.w, r: +st.r, m: !!st.m }));
+        const best = sets.reduce((a, b) => (b.w > a.w ? b : a));
+        return { date: s.date, sets: sets, best: best };
       }
     }
     return null;
+  }
+  /* Row si shows set si from last time; extra rows fall back to the last one logged. */
+  function lastSetAt(last, si) {
+    if (!last || !last.sets.length) return null;
+    return last.sets[si] || last.sets[last.sets.length - 1];
   }
   function exerciseSeries(name) {
     const key = String(name).trim().toLowerCase();
@@ -742,6 +773,56 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       date: s.date, order: s.createdAt || 0, label: s.routineName || "Session", volume: sessionVolume(s), sets: sessionSets(s)
     })).sort(chrono);
     return limit ? rows.slice(-limit) : rows;
+  }
+
+  /* ───────────────────── set / rest timer ───────────────────── */
+  const timer = { running: false, accum: 0, startedAt: 0, tick: null };
+
+  function timerMs() { return timer.accum + (timer.running ? Date.now() - timer.startedAt : 0); }
+  function clockText(ms) {
+    const t = Math.floor(ms / 1000);
+    return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0");
+  }
+  function paintTimer() {
+    const bar = $("#timerBar");
+    if (!bar) return;
+    const ms = timerMs();
+    $("#tClock").textContent = clockText(ms);
+    bar.classList.toggle("running", timer.running);
+    $("#tGo").textContent = timer.running ? "Pause" : (ms > 0 ? "Resume" : "Start");
+    $("#tLabel").textContent = timer.running ? "Running" : (ms > 0 ? "Paused" : "Timer");
+  }
+  function timerStart() {
+    if (timer.running) return;
+    timer.running = true; timer.startedAt = Date.now();
+    clearInterval(timer.tick);
+    timer.tick = setInterval(paintTimer, 500);
+    paintTimer();
+  }
+  function timerPause() {
+    if (!timer.running) return;
+    timer.accum = timerMs(); timer.running = false;
+    clearInterval(timer.tick); timer.tick = null;
+    paintTimer();
+  }
+  function timerReset(silent) {
+    const was = timerMs();
+    timer.accum = 0; timer.startedAt = Date.now();
+    if (!timer.running) { clearInterval(timer.tick); timer.tick = null; }
+    paintTimer();
+    if (!silent && was > 2000) toast("Timer reset from " + clockText(was));
+  }
+  function timerStop() {
+    timer.running = false; timer.accum = 0;
+    clearInterval(timer.tick); timer.tick = null;
+    paintTimer();
+  }
+  $("#tGo").addEventListener("click", () => { timer.running ? timerPause() : timerStart(); });
+  $("#tReset").addEventListener("click", () => timerReset(false));
+  /* Elapsed time comes from timestamps, so backgrounding the app never drifts it. */
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) paintTimer(); });
+  function updateTimerVisibility() {
+    $("#timerBar").hidden = !(state.tab === "log" && state.draft);
   }
 
   /* ────────────────────────── tabs ────────────────────────── */
@@ -925,14 +1006,14 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
           if (!hasData(s)) { toast("Log at least one set with weight and reps first."); return; }
           s.done = true; touch(); queueSession(s, true);
           upsertLocalSession(s);
-          state.draft = null; state.openHistory = s.id;
+          state.draft = null; state.openHistory = s.id; timerStop();
           render(); setTab("history");
           toast("Session saved · " + fmt(sessionVolume(s)) + " lb total volume");
         }
       }, [document.createTextNode("Finish session")]),
       hasData(s)
         ? confirmButton("Discard", "Discard this session and everything logged in it?", () => {
-            removeSession(s.id); state.draft = null; touch(); render(); toast("Session discarded");
+            removeSession(s.id); state.draft = null; timerStop(); touch(); render(); toast("Session discarded");
           })
         : el("button", {
             class: "btn btn-danger",
@@ -960,7 +1041,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
 
     card.appendChild(el("div", { class: "ex-head" }, [
       el("h3", { class: "ex-name", id: nameId, text: entry.name }),
-      last ? el("span", { class: "ex-last", text: "last " + last.w + "×" + last.r }) : null,
+      last ? el("span", { class: "ex-last", text: "best " + last.best.w + "×" + last.best.r }) : null,
       el("button", {
         class: "x", "aria-label": "Remove " + entry.name + " from this session", title: "Remove exercise",
         onclick: () => { s.entries.splice(ei, 1); touch(); queueSession(s, true); render(); }
@@ -971,16 +1052,19 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     (entry.sets || []).forEach((st, si) => {
       const row = el("div", { class: "set-row" + (st.m ? " is-top" : "") });
       const wId = "w_" + entry.id + "_" + si, rId = "r_" + entry.id + "_" + si;
+      const ref = lastSetAt(last, si);
       const wIn = el("input", {
         type: "number", id: wId, class: "w", value: st.w === null || st.w === undefined ? "" : st.w,
-        min: "0", step: "0.5", inputmode: "decimal", "aria-label": "Set " + (si + 1) + " weight in pounds",
-        placeholder: last ? String(last.w) : "lb",
+        min: "0", step: "0.5", inputmode: "decimal",
+        "aria-label": "Set " + (si + 1) + " weight in pounds" + (ref ? ", last time " + ref.w : ""),
+        placeholder: ref ? String(ref.w) : "lb",
         oninput: ev => { st.w = ev.target.value; touch(); queueSession(s); updateTallies(); }
       });
       const rIn = el("input", {
         type: "number", id: rId, class: "r", value: st.r === null || st.r === undefined ? "" : st.r,
-        min: "0", step: "1", inputmode: "numeric", "aria-label": "Set " + (si + 1) + " reps",
-        placeholder: last ? String(last.r) : "reps",
+        min: "0", step: "1", inputmode: "numeric",
+        "aria-label": "Set " + (si + 1) + " reps" + (ref ? ", last time " + ref.r : ""),
+        placeholder: ref ? String(ref.r) : "reps",
         oninput: ev => { st.r = ev.target.value; touch(); queueSession(s); updateTallies(); }
       });
       const mark = el("button", {
@@ -1011,8 +1095,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       el("button", {
         class: "btn btn-ghost btn-sm",
         onclick: () => {
-          const prev = (entry.sets || [])[entry.sets.length - 1];
-          entry.sets.push({ w: prev ? prev.w : "", r: prev ? prev.r : "", m: false });
+          entry.sets.push({ w: "", r: "", m: false });
           touch(); queueSession(s, true); render();
           const inputs = document.querySelectorAll("#w_" + entry.id + "_" + (entry.sets.length - 1));
           if (inputs[0]) inputs[0].focus();
@@ -1496,6 +1579,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
   }
 
   function render() {
+    updateTimerVisibility();
     if (state.tab === "log") renderLog();
     else if (state.tab === "history") renderHistory();
     else if (state.tab === "progress") renderProgress();
