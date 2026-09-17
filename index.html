@@ -133,6 +133,14 @@ body {
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .tab:hover { color: var(--ink); }
 
+.bk-note {
+  display: block; width: 100%; padding: 7px 10px;
+  border: 0; border-top: 1px solid var(--hair);
+  background: var(--mark-soft); color: var(--ink-2);
+  font-size: 12.5px; text-align: center; cursor: pointer;
+}
+.bk-note b { color: var(--ink); font-weight: 600; }
+
 .timerbar {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 0 10px; border-top: 1px solid var(--hair); margin-top: 2px;
@@ -366,6 +374,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       <button class="tab" role="tab" id="tab-progress" aria-controls="panel-progress" aria-selected="false" tabindex="-1">Progress</button>
       <button class="tab" role="tab" id="tab-routines" aria-controls="panel-routines" aria-selected="false" tabindex="-1">Routines</button>
     </div>
+    <button class="bk-note" id="backupNote" type="button" hidden></button>
     <div class="timerbar" id="timerBar" hidden>
       <span class="t-dot" id="tDot" aria-hidden="true"></span>
       <span class="t-clock" id="tClock" role="timer" aria-label="Elapsed time">0:00</span>
@@ -594,6 +603,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     focusRoutine: null,
     chartExercise: null,
     showRestore: false,
+    backupPrompt: false,
     storageOK: true,
     showLineTable: false,
     showVolTable: false,
@@ -605,7 +615,21 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
 
   /* ────────────────────────── storage ────────────────────────── */
   const LS = "setledger.v1";
+  const LSB = "setledger.lastBackup";
   const db = null;
+
+  function lastBackupAt() {
+    try { return +localStorage.getItem(LSB) || 0; } catch (e) { return 0; }
+  }
+  function markBackedUp() {
+    try { localStorage.setItem(LSB, String(Date.now())); } catch (e) { /* nothing to do */ }
+    state.backupPrompt = false;
+    updateBackupNote();
+  }
+  function unbackedCount() {
+    const t = lastBackupAt();
+    return state.sessions.filter(s => s.done && (s.updatedAt || s.createdAt || 0) > t).length;
+  }
 
   function localRead() {
     try {
@@ -689,6 +713,10 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
   }
 
   function boot() {
+    /* ask the OS not to evict this origin's storage under disk pressure or inactivity */
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().catch(function () { /* app still runs without it */ });
+    }
     const ok = storageOK();
     const cached = ok ? localRead() : null;
     if (cached && (cached.routines || cached.sessions)) {
@@ -852,6 +880,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       if (j !== null) { ev.preventDefault(); setTab(TABS[j], true); }
     });
   });
+  $("#backupNote").addEventListener("click", () => setTab("routines"));
 
   /* ────────────────────────── render: LOG ────────────────────────── */
   function startSession(routine) {
@@ -1006,7 +1035,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
           if (!hasData(s)) { toast("Log at least one set with weight and reps first."); return; }
           s.done = true; touch(); queueSession(s, true);
           upsertLocalSession(s);
-          state.draft = null; state.openHistory = s.id; timerStop();
+          state.draft = null; state.openHistory = s.id; state.backupPrompt = true; timerStop();
           render(); setTab("history");
           toast("Session saved · " + fmt(sessionVolume(s)) + " lb total volume");
         }
@@ -1113,6 +1142,28 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     const banner = storageBanner(); if (banner) p.appendChild(banner);
     const list = allSessions();
     const wrap = el("div", { class: "stack" });
+
+    if (state.backupPrompt) {
+      wrap.appendChild(el("div", { class: "card" }, [
+        el("p", { class: "eyebrow", text: "Backup" }),
+        el("p", { class: "small", style: "margin:0 0 10px", text: "Would you like to back up this workout? A backup saves your whole log as a file outside the browser, so nothing is lost even if the browser clears its storage." }),
+        el("div", { class: "btn-row" }, [
+          el("button", {
+            class: "btn btn-sm btn-primary", text: "Save backup file",
+            onclick: () => { saveFile("set-ledger-" + todayISO() + ".json", backupText(), "application/json"); markBackedUp(); renderHistory(); }
+          }),
+          el("button", {
+            class: "btn btn-sm", text: "Copy backup",
+            onclick: () => { copyText(backupText(), "Backup copied — paste it somewhere safe"); markBackedUp(); renderHistory(); }
+          }),
+          el("button", {
+            class: "btn btn-ghost btn-sm", text: "Not now",
+            onclick: () => { state.backupPrompt = false; renderHistory(); }
+          })
+        ])
+      ]));
+    }
+
     wrap.appendChild(el("div", {}, [
       el("p", { class: "eyebrow", text: "Workout log" }),
       el("h2", { class: "sec", text: list.length ? list.length + (list.length === 1 ? " session" : " sessions") : "No sessions yet" })
@@ -1495,14 +1546,15 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     dataCard.appendChild(el("p", { class: "eyebrow", text: "Backup" }));
     dataCard.appendChild(el("p", { class: "small muted", style: "margin:0 0 10px", text: "This copy keeps your log inside this browser only. Nothing leaves the phone, and nothing syncs — so take a backup now and then, especially before clearing browsing data or switching phones." }));
     const row = el("div", { class: "btn-row" });
-    row.appendChild(el("button", { class: "btn btn-sm", text: "Save backup file", onclick: () => saveFile("set-ledger-" + todayISO() + ".json", backupText(), "application/json") }));
-    row.appendChild(el("button", { class: "btn btn-sm", text: "Copy backup", onclick: () => copyText(backupText(), "Backup copied — paste it somewhere safe") }));
+    row.appendChild(el("button", { class: "btn btn-sm", text: "Save backup file", onclick: () => { saveFile("set-ledger-" + todayISO() + ".json", backupText(), "application/json"); markBackedUp(); } }));
+    row.appendChild(el("button", { class: "btn btn-sm", text: "Copy backup", onclick: () => { copyText(backupText(), "Backup copied — paste it somewhere safe"); markBackedUp(); } }));
     row.appendChild(el("button", { class: "btn btn-sm", text: "Save CSV", onclick: () => saveFile("set-ledger-" + todayISO() + ".csv", csvText(), "text/csv") }));
     dataCard.appendChild(row);
 
     const paste = el("textarea", { class: "paste", id: "restoreBox", placeholder: "Paste a backup here", "aria-label": "Backup to restore" });
     const restoreWrap = el("div", { id: "restoreWrap", hidden: state.showRestore ? null : "hidden", style: "margin-top:10px" }, [
       paste,
+      el("p", { class: "small muted", style: "margin:6px 0 0", text: "Restoring merges the backup with what's already here — nothing on this phone is deleted." }),
       el("div", { class: "btn-row", style: "margin-top:8px" }, [
         el("button", {
           class: "btn btn-sm btn-primary", text: "Restore",
@@ -1510,12 +1562,29 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
             let data = null;
             try { data = JSON.parse(paste.value); } catch (e) { toast("That doesn't look like a backup — paste the whole thing."); return; }
             if (!data || (!Array.isArray(data.routines) && !Array.isArray(data.sessions))) { toast("No routines or sessions found in that backup."); return; }
-            state.routines = data.routines || [];
-            state.sessions = data.sessions || [];
-            const act = state.sessions.find(x => !x.done);
-            state.draft = act ? clone(act) : null;
+            /* merge, never replace — what's already on this phone is kept */
+            const beforeS = state.sessions.length, beforeR = state.routines.length;
+            const sMap = new Map(state.sessions.map(s => [s.id, s]));
+            (data.sessions || []).forEach(inc => {
+              const cur = sMap.get(inc.id);
+              if (!cur || (inc.updatedAt || 0) > (cur.updatedAt || 0)) sMap.set(inc.id, clone(inc));
+            });
+            state.sessions = Array.from(sMap.values())
+              .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0)));
+            const rMap = new Map(state.routines.map(r => [r.id, r]));
+            (data.routines || []).forEach(inc => {
+              const cur = rMap.get(inc.id);
+              if (!cur || (inc.updatedAt || 0) > (cur.updatedAt || 0)) rMap.set(inc.id, clone(inc));
+            });
+            state.routines = Array.from(rMap.values())
+              .sort((a, b) => (a.order || 0) - (b.order || 0) || String(a.name).localeCompare(String(b.name)));
+            if (!state.draft) {
+              const act = state.sessions.find(x => !x.done);
+              state.draft = act ? clone(act) : null;
+            }
             localWrite(); state.showRestore = false; render();
-            toast("Restored " + state.sessions.length + " sessions and " + state.routines.length + " routines");
+            const addedS = state.sessions.length - beforeS, addedR = state.routines.length - beforeR;
+            toast("Backup merged: " + addedS + " new session" + (addedS === 1 ? "" : "s") + ", " + addedR + " new routine" + (addedR === 1 ? "" : "s") + " — existing data kept");
           }
         })
       ])
@@ -1578,8 +1647,22 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     ]);
   }
 
+  function updateBackupNote() {
+    const n = $("#backupNote");
+    if (!n) return;
+    const c = unbackedCount();
+    if (!c) { n.hidden = true; return; }
+    n.hidden = false;
+    n.textContent = "";
+    n.appendChild(el("b", { text: c + (c === 1 ? " session" : " sessions") }));
+    n.appendChild(document.createTextNode(
+      (lastBackupAt() ? " since your last backup" : " and no backup yet") + " — tap to back up"
+    ));
+  }
+
   function render() {
     updateTimerVisibility();
+    updateBackupNote();
     if (state.tab === "log") renderLog();
     else if (state.tab === "history") renderHistory();
     else if (state.tab === "progress") renderProgress();
