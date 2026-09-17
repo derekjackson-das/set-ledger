@@ -122,6 +122,17 @@ body {
 .sync { font-size: 11.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; font-weight: 500; }
 .sync b { color: var(--ink-2); font-weight: 600; }
 
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.info-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; margin: -7px -7px -7px 0; padding: 0;
+  border: 0; border-radius: 50%; background: none;
+  color: var(--muted); cursor: pointer;
+}
+.info-btn:hover { color: var(--ink); }
+.info-btn[aria-expanded="true"] { color: var(--accent); }
+.info-btn svg { display: block; }
+
 .tabs { display: flex; gap: 2px; margin-top: 12px; }
 .tab {
   flex: 1 1 0; min-height: 44px; padding: 8px 4px 10px;
@@ -366,7 +377,16 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
         </svg>
         <span class="brand-name">Set Ledger</span>
       </div>
-      <p class="sync" id="syncNote">Loading</p>
+      <div class="hdr-right">
+        <p class="sync" id="syncNote">Loading</p>
+        <button class="info-btn" id="infoBtn" type="button" aria-label="Help" aria-expanded="false" aria-controls="panel-help">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="9.1" y="8.4" width="1.8" height="6.2" rx="0.9" fill="currentColor"/>
+            <circle cx="10" cy="5.7" r="1.15" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-log"      aria-controls="panel-log"      aria-selected="true">Log</button>
@@ -389,6 +409,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     <section role="tabpanel" id="panel-history"  aria-labelledby="tab-history"  tabindex="0" hidden></section>
     <section role="tabpanel" id="panel-progress" aria-labelledby="tab-progress" tabindex="0" hidden></section>
     <section role="tabpanel" id="panel-routines" aria-labelledby="tab-routines" tabindex="0" hidden></section>
+    <section id="panel-help" aria-label="Help" tabindex="0" hidden></section>
   </main>
 
   <footer class="foot">
@@ -855,6 +876,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
 
   /* ────────────────────────── tabs ────────────────────────── */
   const TABS = ["log", "history", "progress", "routines"];
+  let helpReturnTab = "log";
   function setTab(name, focus) {
     state.tab = name;
     TABS.forEach(t => {
@@ -864,7 +886,22 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       btn.tabIndex = on ? 0 : -1;
       pane.hidden = !on;
     });
+    $("#panel-help").hidden = true;
+    $("#infoBtn").setAttribute("aria-expanded", "false");
     if (focus) $("#tab-" + name).focus();
+    render();
+  }
+  function showHelp() {
+    helpReturnTab = state.tab;
+    state.tab = "help";
+    TABS.forEach(t => {
+      $("#tab-" + t).setAttribute("aria-selected", "false");
+      $("#tab-" + t).tabIndex = -1;
+      $("#panel-" + t).hidden = true;
+    });
+    $("#tab-log").tabIndex = 0;
+    $("#panel-help").hidden = false;
+    $("#infoBtn").setAttribute("aria-expanded", "true");
     render();
   }
   TABS.forEach((t, i) => {
@@ -881,6 +918,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     });
   });
   $("#backupNote").addEventListener("click", () => setTab("routines"));
+  $("#infoBtn").addEventListener("click", () => { state.tab === "help" ? setTab(helpReturnTab) : showHelp(); });
 
   /* ────────────────────────── render: LOG ────────────────────────── */
   function startSession(routine) {
@@ -1666,7 +1704,61 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     if (state.tab === "log") renderLog();
     else if (state.tab === "history") renderHistory();
     else if (state.tab === "progress") renderProgress();
+    else if (state.tab === "help") renderHelp();
     else renderRoutines();
+  }
+
+  /* ────────────────────────── render: HELP ────────────────────────── */
+  function renderHelp() {
+    const p = $("#panel-help");
+    p.textContent = "";
+    const wrap = el("div", { class: "stack" });
+    wrap.appendChild(el("div", {}, [
+      el("p", { class: "eyebrow", text: "Help" }),
+      el("h2", { class: "sec", text: "How Set Ledger works" })
+    ]));
+
+    const card = (title, lines) => el("div", { class: "card" },
+      [el("p", { class: "eyebrow", text: title })].concat(
+        lines.map(t => el("p", { class: "small", style: "margin:0 0 8px", text: t }))
+      ));
+
+    wrap.appendChild(card("Logging a workout", [
+      "Tap a routine to start it, or start an open session and add exercises as you go — you can save that list as a routine when you finish.",
+      "The grey number in an empty weight or reps field is what you did last time for that same set. Beat it or match it.",
+      "Tap the circle at the end of a set row to mark your top set — it's highlighted here, flagged in History, and drives the Progress chart.",
+      "One session is logged at a time, and it survives closing the app. Finish session files it under History; Discard throws it away."
+    ]));
+
+    wrap.appendChild(card("Set / rest timer", [
+      "While a session is open, the timer bar sits in the header — start it for a set or a rest period, pause it, reset it.",
+      "It runs off real timestamps, so switching apps or locking the phone never drifts it."
+    ]));
+
+    wrap.appendChild(card("History & Progress", [
+      "History lists every finished workout — tap one to see all sets. Top sets are marked ◉.",
+      "Progress charts one exercise at a time: top-set weight and estimated one-rep max (Epley: weight × (1 + reps ÷ 30)), plus total volume per session.",
+      "Charts appear once an exercise shows up in a couple of sessions."
+    ]));
+
+    wrap.appendChild(card("Backups — the important part", [
+      "Your log lives in this browser on this phone only. Nothing syncs. The backup file is the only copy that's truly yours — it lands in your Files, where restarts and cleared browsing data can't touch it.",
+      "After each finished session the app offers a backup, and the strip under the tabs counts sessions since your last one.",
+      "Every backup is a full snapshot of your whole history, so you only need the most recent file.",
+      "Restoring merges — it adds what's missing and never deletes what's already here, so restoring an old backup can't wipe new sessions.",
+      "Save CSV exports every set for spreadsheets — analysis only; restoring needs the JSON backup."
+    ]));
+
+    wrap.appendChild(card("iPhone quirk worth knowing", [
+      "The home-screen app and the Safari tab keep separate storage. If your data seems to have vanished, check the other one before assuming it's gone — and always log in the same place."
+    ]));
+
+    wrap.appendChild(el("button", {
+      class: "btn", style: "align-self:flex-start", text: "← Back",
+      onclick: () => setTab(helpReturnTab)
+    }));
+
+    p.appendChild(wrap);
   }
 
   render();
