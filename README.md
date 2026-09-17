@@ -39,20 +39,78 @@ you already have. Just keep the four items together in one directory.
 
 After the first load the service worker has cached everything, so it opens in airplane mode.
 
-## What lives where
+---
 
-Your workouts are stored in the browser's local storage on that device. They never travel
-to the host, and a public repository does not expose them — but they also don't sync
-between devices, and clearing browsing data wipes them.
+## Using the app
 
-Use **Routines → Backup** regularly:
+Four tabs: **Log**, **History**, **Progress**, **Routines**.
 
-- *Save backup file* / *Copy backup* writes everything out as JSON.
-- *Restore from a backup* reads it back — this is also how you move your history over from
-  the synced Claude version (export JSON there, paste it here).
+### Log a workout
 
-This build ships with your two routines and no logged sessions, so nothing about your
-training goes into a public repository. Restore a backup to bring your history in.
+- Tap a routine to start it, or **Start an open session** to build the workout as you go.
+  An open session can be saved as a routine when you finish, so it's an easy way to create one.
+- Each set has a weight and reps field. The grey placeholder in an empty field is **what you
+  did last time** for that same set of that same exercise — beat it or match it.
+- Tap the circle at the end of a set row to mark it as your **top set**; it's highlighted in
+  the log, flagged in History, and drives the Progress chart.
+- Adding an exercise suggests names from everything you've logged before, so spellings stay
+  consistent and your history for that exercise stays connected.
+- The running **volume / sets / exercises** tallies update as you type. When you're done,
+  **Finish session** files it under History; **Discard** throws it away.
+- One session can be in progress at a time, and it survives closing the app — reopen and
+  it's still there on the Log tab.
+
+### Set / rest timer
+
+While a session is open, a timer bar sits in the header — start it for a set or a rest
+period, pause it, reset it. It works off real timestamps, so switching apps or locking the
+phone never drifts it.
+
+### History and Progress
+
+- **History** lists every finished workout — tap one to see all sets (top sets marked ◉).
+- **Progress** charts one exercise at a time: top-set weight and estimated one-rep max
+  (Epley: weight × (1 + reps ÷ 30)), plus total volume per session. Charts appear once
+  you've logged an exercise in a couple of sessions.
+
+### Routines
+
+Build and edit routines on the Routines tab. Deleting a routine never touches the sessions
+you already logged from it.
+
+## Keeping your data safe
+
+Your log lives in the browser's local storage on the phone — nothing syncs anywhere. The
+app has several layers of protection, but **the backup file is the only copy that is truly
+yours**: it lives in your Files/Downloads, outside the browser, where restarts, cleared
+browsing data, and even uninstalling can't touch it.
+
+- **After every finished session** the app asks *"Would you like to back up this workout?"*
+  — one tap saves the whole log as a JSON file.
+- **The header shows a running count** of sessions logged since your last backup. Tap it to
+  jump to the backup buttons. It disappears once you're backed up.
+- **Backups are full snapshots.** Every backup contains your entire history, so you only
+  ever need the most recent file.
+- **Restore merges — it never deletes.** Restoring a backup adds whatever the phone is
+  missing and keeps everything already there, so restoring an old file can't wipe new
+  sessions. Where a session exists in both, the more recently edited copy wins.
+- **The app asks the OS for persistent storage** on startup, which tells iOS/Android not to
+  evict its data under disk pressure or after inactivity. This helps, but it's a request,
+  not a guarantee — hence the backups.
+- **Save CSV** exports every set as a spreadsheet row if you want to analyze your training
+  elsewhere. (CSV is for analysis only — restore needs the JSON backup.)
+
+Worth knowing on iPhone: the home-screen app and the Safari tab keep **separate storage**.
+If your data seems to have vanished, check the other one before assuming it's gone — and
+always log in the same place.
+
+## Privacy
+
+Your workouts never travel to the host, and a public repository does not expose them — the
+repo holds only the app itself. This build ships with two starter routines and no logged
+sessions. Restore a backup (Routines → *Restore from a backup*) to bring history in from
+another device, or to move over from the synced Claude version (export JSON there, paste it
+here).
 
 ## Updating the app later
 
