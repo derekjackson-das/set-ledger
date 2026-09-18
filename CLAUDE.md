@@ -25,6 +25,10 @@ copy indefinitely.
 - The tab bar stays at exactly four tabs: Log, History, Progress, Routines. Do not add a
   fifth. Rarely-used surfaces go behind the circled-i info button in the header (see the
   `showHelp()` / `#panel-help` pattern) or nest inside an existing tab.
+- Small per-item editors (e.g. the exercise note) open in the native `<dialog>` via
+  `showModal()` — see `showNotes()` / `#noteDialog`. Values that change on every
+  keystroke are patched in place by id (see `updateTallies()` / `updateVolumes()`),
+  never by re-rendering, so the focused field keeps focus.
 - Rendering is manual: mutate `state`, then call `render()` (or the tab-specific
   `renderX()`). DOM is built with the `el()` helper — no innerHTML for dynamic content.
 - Match the existing style: condensed uppercase headings, `.card` containers, `.btn`
