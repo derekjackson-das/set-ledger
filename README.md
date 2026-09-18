@@ -53,6 +53,11 @@ Four tabs: **Log**, **History**, **Progress**, **Routines**.
   did last time** for that same set of that same exercise — beat it or match it.
 - Tap the circle at the end of a set row to mark it as your **top set**; it's highlighted in
   the log, flagged in History, and drives the Progress chart.
+- The **Vol** column shows each set's weight × reps, and the total at the foot of each
+  exercise card adds them up. Both update as you type.
+- The **pencil** on each exercise opens a note — seat position, grip width, how it felt.
+  The note carries over to the next time you log that exercise, so you can keep it, add to
+  it, or clear it and start fresh. A dot on the pencil means a note exists.
 - Adding an exercise suggests names from everything you've logged before, so spellings stay
   consistent and your history for that exercise stays connected.
 - The running **volume / sets / exercises** tallies update as you type. When you're done,
@@ -68,7 +73,8 @@ phone never drifts it.
 
 ### History and Progress
 
-- **History** lists every finished workout — tap one to see all sets (top sets marked ◉).
+- **History** lists every finished workout — tap one to see all sets (top sets marked ◉),
+  each exercise's total volume, and any note you left on it.
 - **Progress** charts one exercise at a time: top-set weight and estimated one-rep max
   (Epley: weight × (1 + reps ÷ 30)), plus total volume per session. Charts appear once
   you've logged an exercise in a couple of sessions.

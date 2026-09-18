@@ -267,13 +267,29 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   width: 20px; flex: none; text-align: center;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); font-weight: 500;
 }
-.set-row .w { width: 74px; flex: none; }
+.set-row .w { width: 70px; flex: none; }
 .set-row .r { width: 62px; flex: none; }
+.set-row .vol {
+  width: 58px; flex: none; text-align: right;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 13px;
+  font-variant-numeric: tabular-nums; color: var(--ink-2);
+}
+.set-row .vol.none { color: var(--ink-2); }
+.set-head {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px 4px; border-bottom: 1px solid var(--hair);
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); font-weight: 600;
+}
+.set-head .set-n { font-size: 11px; font-family: inherit; }
+.set-head .w, .set-head .r { flex: none; }
+.set-head .w { width: 70px; }
+.set-head .r { width: 62px; }
+.set-head .vol { width: 58px; flex: none; text-align: right; }
 .times { color: var(--muted); font-size: 14px; flex: none; }
 .unit { color: var(--muted); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; flex: none; }
 .mark {
   margin-left: auto; flex: none;
-  min-height: 40px; padding: 4px 9px 4px 7px; border-radius: 999px;
+  min-height: 40px; padding: 4px 7px 4px 6px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
   display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
   font-family: "Avenir Next Condensed", "Roboto Condensed", "Helvetica Neue Condensed", "Arial Narrow", system-ui, sans-serif; font-size: 13px; font-weight: 600;
@@ -287,7 +303,39 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   color: var(--muted); font-size: 19px; line-height: 1; border-radius: 8px;
 }
 .x:hover { color: var(--danger); background: var(--surface-2); }
-.ex-foot { display: flex; gap: 6px; padding: 8px 8px 10px 12px; border-top: 1px solid var(--hair); }
+.note-btn {
+  position: relative; flex: none; width: 36px; height: 40px; border: 0; background: none; cursor: pointer;
+  color: var(--muted); font-size: 18px; line-height: 1; border-radius: 8px;
+}
+.note-btn:hover { color: var(--ink); background: var(--surface-2); }
+.note-btn .dot {
+  position: absolute; top: 7px; right: 5px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--surface-2); display: none;
+}
+.note-btn.has-note { color: var(--accent); }
+.note-btn.has-note .dot { display: block; }
+.note-dialog {
+  border: 1px solid var(--hair); border-radius: var(--radius); padding: 16px; margin: auto;
+  width: min(92vw, 420px); background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+}
+.note-dialog::backdrop { background: rgba(18, 20, 26, .45); }
+.note-dialog h3 { margin: 2px 0 10px; }
+.note-dialog textarea {
+  width: 100%; min-height: 120px; padding: 10px 12px; box-sizing: border-box; resize: vertical;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 9px;
+  font-family: inherit; font-size: 15px; line-height: 1.4;
+}
+.note-dialog .btn-row { margin-top: 12px; justify-content: flex-end; }
+.note-line { font-size: 12.5px; color: var(--muted); margin-top: 2px; white-space: pre-wrap; }
+.ex-foot { display: flex; align-items: center; gap: 6px; padding: 8px 12px 10px 12px; border-top: 1px solid var(--hair); }
+.ex-total {
+  margin-left: auto; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); font-weight: 600;
+  white-space: nowrap;
+}
+.ex-total b {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums;
+  font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; font-weight: 600;
+}
 
 /* add-exercise form */
 .addex { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
@@ -312,7 +360,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 }
 .detail { border-top: 1px solid var(--hair); padding: 10px 14px 14px; }
 .detail table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.detail th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 4px 0; font-weight: 600; }
+.detail th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 4px 0 4px 8px; font-weight: 600; white-space: nowrap; }
+.detail th:first-child, .detail td:first-child { padding-left: 0; }
+.detail td.sets { padding-left: 8px; }
 .detail td { padding: 5px 0; border-top: 1px solid var(--hair); vertical-align: top; }
 .detail td.sets { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; text-align: right; }
 .detail td.sets .top { color: var(--mark); font-weight: 600; }
@@ -411,6 +461,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     <section role="tabpanel" id="panel-routines" aria-labelledby="tab-routines" tabindex="0" hidden></section>
     <section id="panel-help" aria-label="Help" tabindex="0" hidden></section>
   </main>
+  <dialog id="noteDialog" class="note-dialog" aria-labelledby="noteTitle"></dialog>
 
   <footer class="foot">
     <p id="footNote">Weights in pounds. Estimated one-rep max uses the Epley formula (weight × (1 + reps ÷ 30)).</p>
@@ -446,7 +497,9 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
   const longDate = s => parseISO(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const epley = (w, r) => w * (1 + r / 30);
   const filled = st => num(st.w) !== null && num(st.r) !== null && +st.r > 0;
-  const sessionVolume = s => (s.entries || []).reduce((a, e) => a + (e.sets || []).reduce((b, st) => b + (filled(st) ? +st.w * +st.r : 0), 0), 0);
+  const setVolume = st => (filled(st) ? +st.w * +st.r : null);
+  const exerciseVolume = e => (e.sets || []).reduce((b, st) => b + (setVolume(st) || 0), 0);
+  const sessionVolume = s => (s.entries || []).reduce((a, e) => a + exerciseVolume(e), 0);
   const sessionSets = s => (s.entries || []).reduce((a, e) => a + (e.sets || []).filter(filled).length, 0);
   const hasData = s => sessionSets(s) > 0;
 
@@ -798,6 +851,19 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     if (!last || !last.sets.length) return null;
     return last.sets[si] || last.sets[last.sets.length - 1];
   }
+  /* The most recent note written for this exercise name, so it can follow the
+     exercise into the next session. */
+  function lastNote(name, excludeId) {
+    const key = String(name).trim().toLowerCase();
+    for (const s of allSessions()) {
+      if (s.id === excludeId) continue;
+      for (const e of (s.entries || [])) {
+        if (String(e.name).trim().toLowerCase() !== key) continue;
+        if (e.note && String(e.note).trim()) return String(e.note);
+      }
+    }
+    return "";
+  }
   function exerciseSeries(name) {
     const key = String(name).trim().toLowerCase();
     const out = [];
@@ -930,7 +996,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       done: false,
       createdAt: Date.now(),
       entries: (routine ? routine.exercises || [] : []).map(x => ({
-        id: uid("e_"), name: x.name,
+        id: uid("e_"), name: x.name, note: lastNote(x.name),
         sets: Array.from({ length: Math.max(1, Math.min(12, +x.sets || 3)) }, () => ({ w: "", r: "", m: false }))
       }))
     };
@@ -1032,7 +1098,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       const nm = nameIn.value.trim();
       if (!nm) { nameIn.focus(); toast("Name the exercise first."); return; }
       const count = Math.max(1, Math.min(12, +setsIn.value || 3));
-      s.entries.push({ id: uid("e_"), name: nm, sets: Array.from({ length: count }, () => ({ w: "", r: "", m: false })) });
+      s.entries.push({ id: uid("e_"), name: nm, note: lastNote(nm, s.id), sets: Array.from({ length: count }, () => ({ w: "", r: "", m: false })) });
       touch(); queueSession(s, true); render();
       toast(nm + " added");
     };
@@ -1100,6 +1166,18 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     [["Volume", fmt(sessionVolume(s)) + " lb"], ["Sets", String(sessionSets(s))], ["Exercises", String((s.entries || []).length)]]
       .forEach(([k, v]) => box.appendChild(el("div", { class: "tally" }, [el("b", { text: v }), el("span", { text: k })])));
   }
+  /* Patch the volume cells and exercise total in place, so typing never re-renders. */
+  function updateVolumes(entry) {
+    (entry.sets || []).forEach((st, si) => {
+      const cell = document.getElementById("v_" + entry.id + "_" + si);
+      if (!cell) return;
+      const v = setVolume(st);
+      cell.lastChild.textContent = v === null ? "—" : fmt(v);
+      cell.classList.toggle("none", v === null);
+    });
+    const tot = document.getElementById("vt_" + entry.id);
+    if (tot) tot.textContent = fmt(exerciseVolume(entry));
+  }
 
   function renderExercise(s, entry, ei) {
     const card = el("div", { class: "card ex" });
@@ -1110,12 +1188,23 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       el("h3", { class: "ex-name", id: nameId, text: entry.name }),
       last ? el("span", { class: "ex-last", text: "best " + last.best.w + "×" + last.best.r }) : null,
       el("button", {
+        class: "note-btn" + (entry.note && entry.note.trim() ? " has-note" : ""), id: "nb_" + entry.id,
+        "aria-label": "Notes for " + entry.name + (entry.note && entry.note.trim() ? ", has a note" : ""), title: "Notes",
+        onclick: () => showNotes(s, entry)
+      }, [document.createTextNode("✎"), el("span", { class: "dot", "aria-hidden": "true" })]),
+      el("button", {
         class: "x", "aria-label": "Remove " + entry.name + " from this session", title: "Remove exercise",
         onclick: () => { s.entries.splice(ei, 1); touch(); queueSession(s, true); render(); }
       }, [document.createTextNode("×")])
     ]));
 
     const group = el("div", { role: "group", "aria-labelledby": nameId });
+    group.appendChild(el("div", { class: "set-head", "aria-hidden": "true" }, [
+      el("span", { class: "set-n", text: "#" }),
+      el("span", { class: "w", text: "lb" }),
+      el("span", { class: "r", text: "reps" }),
+      el("span", { class: "vol", text: "vol" })
+    ]));
     (entry.sets || []).forEach((st, si) => {
       const row = el("div", { class: "set-row" + (st.m ? " is-top" : "") });
       const wId = "w_" + entry.id + "_" + si, rId = "r_" + entry.id + "_" + si;
@@ -1125,14 +1214,14 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
         min: "0", step: "0.5", inputmode: "decimal",
         "aria-label": "Set " + (si + 1) + " weight in pounds" + (ref ? ", last time " + ref.w : ""),
         placeholder: ref ? String(ref.w) : "lb",
-        oninput: ev => { st.w = ev.target.value; touch(); queueSession(s); updateTallies(); }
+        oninput: ev => { st.w = ev.target.value; touch(); queueSession(s); updateTallies(); updateVolumes(entry); }
       });
       const rIn = el("input", {
         type: "number", id: rId, class: "r", value: st.r === null || st.r === undefined ? "" : st.r,
         min: "0", step: "1", inputmode: "numeric",
         "aria-label": "Set " + (si + 1) + " reps" + (ref ? ", last time " + ref.r : ""),
         placeholder: ref ? String(ref.r) : "reps",
-        oninput: ev => { st.r = ev.target.value; touch(); queueSession(s); updateTallies(); }
+        oninput: ev => { st.r = ev.target.value; touch(); queueSession(s); updateTallies(); updateVolumes(entry); }
       });
       const mark = el("button", {
         class: "mark", "aria-pressed": st.m ? "true" : "false",
@@ -1144,11 +1233,15 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
         }
       }, [el("span", { class: "dot", "aria-hidden": "true" }), document.createTextNode("top")]);
 
+      const v = setVolume(st);
       row.append(
         el("span", { class: "set-n", "aria-hidden": "true", text: String(si + 1) }),
-        wIn, el("span", { class: "unit", "aria-hidden": "true", text: "lb" }),
-        el("span", { class: "times", "aria-hidden": "true", text: "×" }),
-        rIn, mark,
+        wIn, rIn,
+        el("span", { class: "vol" + (v === null ? " none" : ""), id: "v_" + entry.id + "_" + si }, [
+          el("span", { class: "sr-only", text: "Set " + (si + 1) + " volume in pounds: " }),
+          document.createTextNode(v === null ? "—" : fmt(v))
+        ]),
+        mark,
         el("button", {
           class: "x", "aria-label": "Delete set " + (si + 1) + " of " + entry.name,
           onclick: () => { entry.sets.splice(si, 1); touch(); queueSession(s, true); render(); }
@@ -1168,9 +1261,50 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
           if (inputs[0]) inputs[0].focus();
         },
         text: "+ Add set"
-      })
+      }),
+      el("span", { class: "ex-total" }, [
+        document.createTextNode("Total "),
+        el("b", { id: "vt_" + entry.id, text: fmt(exerciseVolume(entry)) }),
+        document.createTextNode(" lb")
+      ])
     ]));
     return card;
+  }
+
+  /* One note per exercise, edited in a modal so the card stays compact. Autosaves. */
+  function showNotes(s, entry) {
+    const dlg = $("#noteDialog");
+    dlg.textContent = "";
+    const paintBtn = () => {
+      const b = document.getElementById("nb_" + entry.id);
+      if (!b) return;
+      const has = !!(entry.note && entry.note.trim());
+      b.classList.toggle("has-note", has);
+      b.setAttribute("aria-label", "Notes for " + entry.name + (has ? ", has a note" : ""));
+    };
+    const ta = el("textarea", {
+      id: "noteText", "aria-label": "Notes for " + entry.name, placeholder: "Seat position, grip, how it felt…",
+      oninput: ev => { entry.note = ev.target.value; touch(); queueSession(s); paintBtn(); }
+    });
+    ta.value = entry.note || "";
+    dlg.append(
+      el("p", { class: "eyebrow", text: "Notes" }),
+      el("h3", { class: "ex-name", id: "noteTitle", text: entry.name }),
+      el("p", { class: "small muted", style: "margin:0 0 10px", text: "Carries over to the next time you log this exercise. Edit it or clear it any time." }),
+      ta,
+      el("div", { class: "btn-row" }, [
+        el("button", {
+          class: "btn btn-ghost btn-sm", text: "Clear note",
+          onclick: () => { ta.value = ""; entry.note = ""; touch(); queueSession(s); paintBtn(); ta.focus(); }
+        }),
+        el("button", { class: "btn btn-primary btn-sm", text: "Done", onclick: () => dlg.close() })
+      ])
+    );
+    /* iOS doesn't focus a tapped button, so the browser has nothing to return focus to. */
+    dlg.addEventListener("close", () => { const b = document.getElementById("nb_" + entry.id); if (b) b.focus(); }, { once: true });
+    dlg.showModal();
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
   }
 
   /* ────────────────────────── render: HISTORY ────────────────────────── */
@@ -1235,7 +1369,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
         const d = el("div", { class: "detail" });
         const table = el("table");
         table.appendChild(el("thead", {}, [el("tr", {}, [
-          el("th", { text: "Exercise" }), el("th", { style: "text-align:right", text: "Sets logged" })
+          el("th", { text: "Exercise" }), el("th", { style: "text-align:right", text: "Sets logged" }), el("th", { style: "text-align:right", text: "Total" })
         ])]));
         const tb = el("tbody");
         (s.entries || []).forEach(e => {
@@ -1245,7 +1379,14 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
           else done.forEach((st, i) => {
             cell.appendChild(el("span", { class: st.m ? "top" : "", text: (i ? "  " : "") + st.w + "×" + st.r + (st.m ? "◉" : "") }));
           });
-          tb.appendChild(el("tr", {}, [el("td", { text: e.name }), cell]));
+          const total = el("td", { class: "sets", style: "white-space:nowrap" });
+          if (!done.length) total.appendChild(el("span", { class: "muted", text: "—" }));
+          else total.appendChild(document.createTextNode(fmt(exerciseVolume(e)) + " lb"));
+          const nameCell = el("td", {}, [
+            document.createTextNode(e.name),
+            e.note && String(e.note).trim() ? el("div", { class: "note-line", text: String(e.note).trim() }) : null
+          ]);
+          tb.appendChild(el("tr", {}, [nameCell, cell, total]));
         });
         table.appendChild(tb);
         d.appendChild(el("div", { class: "scroll-x" }, [table]));
@@ -1727,6 +1868,8 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
       "Tap a routine to start it, or start an open session and add exercises as you go — you can save that list as a routine when you finish.",
       "The grey number in an empty weight or reps field is what you did last time for that same set. Beat it or match it.",
       "Tap the circle at the end of a set row to mark your top set — it's highlighted here, flagged in History, and drives the Progress chart.",
+      "The Vol column is that set's weight × reps, and the exercise total at the foot of each card adds them up. Both update as you type.",
+      "The pencil on each exercise opens a note — seat position, grip, how it felt. The note carries over to the next time you log that exercise; keep it, add to it, or clear it. A dot on the pencil means there's a note.",
       "One session is logged at a time, and it survives closing the app. Finish session files it under History; Discard throws it away."
     ]));
 
@@ -1736,7 +1879,7 @@ footer.foot { padding: 0 14px 26px; color: var(--muted); font-size: 12.5px; }
     ]));
 
     wrap.appendChild(card("History & Progress", [
-      "History lists every finished workout — tap one to see all sets. Top sets are marked ◉.",
+      "History lists every finished workout — tap one to see all sets, each exercise's total volume, and any note you left. Top sets are marked ◉.",
       "Progress charts one exercise at a time: top-set weight and estimated one-rep max (Epley: weight × (1 + reps ÷ 30)), plus total volume per session.",
       "Charts appear once an exercise shows up in a couple of sessions."
     ]));
